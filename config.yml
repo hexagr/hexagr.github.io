@@ -1,0 +1,119 @@
+title: Stephan Bridger
+baseURL: "https://hexagr.github.io/posts/"
+theme: PaperModX
+enableRobotsTXT: true
+enableEmoji: true
+
+params:
+  description: "Stephan Bridger's github blog."
+  author: Stephan Bridger
+  images:
+    - cover.png
+  favicon: favicon.ico
+  #logo:
+  #  icon: images/logo.svg
+  DateFormat: "2006-01-02"
+  useCustomAnalytics: true
+  mainSections:
+    - posts
+    - notes
+
+  # theme params
+  DisableLanguageSwitch: true
+  TocOpen: true
+  TocSide: right
+  EnableInstantClick: false
+  EnableImageZoom: true
+  ShowShareButtons: true
+  ShareButtons: ["twitter", "linkedin", "reddit", "facebook", "whatsapp", "telegram", "ycombinator"]
+  ShowReadingTime: true
+  ShowWordCount: true
+  ShowCodeCopyButtons: true
+  ShowPostNavLinks: true
+  Email: hello@example.com
+
+  socialIcons:
+    - name: github-simple
+      url: "https://github.com/hexagr"
+    - name: twitter-simple
+      url: "https://twitter.com/hexagr"
+    - name: rss-simple
+      url: "feed.xml"
+    - name: hackerone
+      url: "https://hackerone.com/hexagr"
+    - name: flickr
+      url: "https://flickr.com/hexagr"
+    - name: mastodon
+      url: "https://mastodon.social/@hexagr"
+
+  socialAccounts:
+    twitter:
+      username: hexagr
+
+  homeInfoParams:
+    Title: "The Kraken sleepeth"      
+    Content: |+
+      Once upon a time, I worked as a musician. In 2020, I briefly attended university before
+      leaving to work on research independently.
+ 
+      Math, language, and cryptography are things I think about a lot. But I have too many interests. 
+      Jazz is also inspiring. And I probably spend more time than I should playing music. 
+
+      At the moment, I don't have a primary website, only a trail of notes scattered across the internet. 
+      But this blog is a space to occasionally write about computers. 
+      
+  #commentSystems:
+  #  disqus:
+  #    shortname: reorx
+  #  remark42:
+  #    url: https://remark42.reorx.com
+  #    site: reorx.github.io
+  #  telegramWidget:
+  #    channel: reorx_share
+  #    accentColor: "9077e1"
+  #    limit: 20
+  #defaultCommentSystems:
+  #  remark42: true
+
+permalinks:
+  notes: /:section/:year/:month/:slugorfilename
+
+# prefer feed.xml rather than index.xml
+outputFormats:
+  RSS:
+    mediatype: "application/rss"
+    baseName: "feed"
+
+minify:
+  disableXML: true
+
+menu:
+  main:
+    - name: Posts
+      url: /posts/
+      weight: 1
+    - name: Notes
+      url: /notes/
+      weight: 2
+    - name: Newsletter
+      url: /newsletter/
+      weight: 3
+    - name: Archives
+      url: /archives/
+      weight: 4
+    - name: About
+      url: /about/
+      weight: 5
+
+languages:
+  en:
+    languageName: "English"
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    style: dracula
+    lineNos: false
+    noClasses: false
