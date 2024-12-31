@@ -1,0 +1,92 @@
+/*
+This is just a placeholder blank stylesheet so as to support adding custom styles budled with theme's default styles
+
+Read https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#bundling-custom-css-with-themes-assets for more info
+*/
+
+/* This is now a custom CSS template 
+*/
+
+:root {
+	--main-width: 640px;
+	--link-hover-color: #1fad66;
+	--link-hover-underline-color: #1fad66;
+    --signature: #1fad66;
+}
+
+
+
+.dark {
+	--max-width: var(--main-width);
+	--link-hover-color: #ff5e4d;
+	--link-hover-underline-color: #ff5e4d;
+	--signature: #ff5e4d;
+    
+}
+
+
+.main div {
+	max-width: var(--main-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.page-header h1 {
+	font-size: 32px;
+}
+
+.entry-header h2 {
+	font-size: 25px;
+}
+
+
+.post-tags {
+	text-transform: lowercase;
+}
+
+
+.post-footer {
+	max-width: var(--main-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.post-title {
+	font-size: 35px;
+	max-width: var(--main-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+
+main div.post-content p {
+    font-size: 17px;
+    text-align:justify;
+}
+
+main div.post-content blockquote {
+	text-align:justify;
+}
+
+main div.post-content h1 {
+	font-size: 32px;
+}
+
+
+main div.post-content h2 {
+	font-size: 28px;
+}
+
+main div.post-content code {
+	font-size: 12.5px;
+	line-height: 17px;
+
+}
+
+
+.toc {
+	max-width: var(--main-width);
+	margin-left: auto;
+	margin-right: auto;
+
+}
