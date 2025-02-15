@@ -1,0 +1,54 @@
+{{- if not (.Param "hideFooter") }}
+<footer class="footer">
+    {{- if (and site.Params.ShowShareButtons (ne .Params.disableShare true)) }}
+    {{- partial "share_icons.html" . -}}
+    {{- end }}
+  {{- if site.Copyright }}
+  <span>{{ site.Copyright | markdownify }}</span>
+  {{- else }}
+  <span>&copy; {{ now.Year }} <a href="https://hackerone.com/hexagr/badges/" title="Stephan Bridger, Platform Badges on HackerOne">{{ site.Title }}</a> (<a 
+href="https://hexagr.blogspot.com" title="Stephan Bridger on Blogspot">@hexagr</a>)</span>
+  {{- end -}}
+  <span style="display: inline-block; margin-left: 1em;">
+    Powered by
+    <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+    <a href="https://github.com/reorx/hugo-PaperModX/" rel="noopener" 
+target="_blank">PaperModX</a>
+
+
+  </span>
+  <br><br>
+  <hr style="border: 1px solid #CCC;"/>
+  <br>
+          <small>
+<a href="https://twitter.com/hexagr" target="_blank" title="Stephan Bridger on Twitter">twitter</a> /
+<a href="https://hexagr.wordpress.com" target="_blank" title="Stephan Bridger on WordPress">wordpress</a> /
+<a href="https://youtube.com/@hexagr" target="_blank" title="Stephan Bridger on YouTube">youtube</a> /
+<a href="https://vimeo.com/hexagr" target="_blank" title="Stephan Bridger on Vimeo">vimeo</a> /
+<a href="https://hexagr.blogspot.com" target="_blank" title="Stephan Bridger on Blogspot">blogspot</a> /
+<a href="https://github.com/hexagr" target="_blank" title="Stephan Bridger on GitHub">github</a> /
+<a href="https://hackerone.com/hexagr/hacktivity/" target="_blank" title="Stephan Bridger's Hacktivity on HackerOne">hackerone</a> /
+<a href="https://flickr.com/people/hexagr" target="_blank" title="Stephan Bridger on Flickr">flickr</a> /
+<a href="https://twitch.tv/hexagr" target="_blank" title="Stephan Bridger on Twitch">twitch</a> / 
+<a href="https://hexagr.tumblr.com" target="_blank" title="Stephan Bridger on Tumblr">tumblr</a>
+</small>
+
+
+</footer>
+{{- end }}
+
+<script>
+  (function() {
+    /* theme toggle */
+    const disableThemeToggle = '{{ if site.Params.disableThemeToggle }}1{{ end }}' == '1';
+    if (disableThemeToggle) {
+      return;
+    }
+
+    let button = document.getElementById("theme-toggle")
+    // remove the listeners first to prevent adding duplicated listener when history goes back and forth
+    button.removeEventListener('click', toggleThemeListener)
+    // listen to toggle button
+    button.addEventListener('click', toggleThemeListener)
+  })();
+</script>
