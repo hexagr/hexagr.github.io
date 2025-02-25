@@ -1,0 +1,142 @@
+title: Stephan Bridger
+baseURL: "http://hexagram.foo"
+theme: PaperMod
+enableRobotsTXT: true
+enableEmoji: true
+
+params:
+  profileMode:
+    enabled: true
+    title: " "
+    subtitle: "The Kraken sleepeth;"
+    imageUrl: "/cardinal.jpg"
+    imageTitle: "Cardinal"
+    imageWidth: 120
+    imageHeight: 120
+    buttons:
+      - name: Archive
+        url: "/archive"
+      - name: Tags
+        url: "/tags"
+    defaultTheme: "light" # or "dark"
+   
+    customCSS: ["extended/syntax.css"]
+
+  description: "Stephan Bridger's github blog."
+  author: Stephan Bridger
+  images:
+    - cover.png
+  favicon: favicon.ico
+  #logo:
+  #  icon: images/logo.svg
+  DateFormat: ":date_long"
+  timeZone: 'America/New York'
+  useCustomAnalytics: true
+  defaultTheme: auto
+  mainSections:
+    - posts
+  useCustomAnalytics: false
+  
+
+
+  # theme params
+  showAllPostsArchive: true
+  DisableLanguageSwitch: true
+  TocOpen: false
+  TocSide: right
+  EnableInstantClick: false
+  EnableImageZoom: true
+  ShowShareButtons: true
+  ShareButtons: ["twitter", "linkedin", "reddit", "facebook", "whatsapp", "telegram", "ycombinator"]
+  ShowReadingTime: true
+  ShowWordCount: true
+  ShowCodeCopyButtons: true
+  ShowPostNavLinks: true
+  Email: hello@example.com
+
+  socialIcons:
+    - name: github
+      url: "https://github.com/hexagr"
+    - name: twitter
+      url: "https://x.com/hexagr"
+    - name: hackerone
+      url: "https://hackerone.com/hexagr"
+    - name: flickr
+      url: "https://flickr.com/photos/hexagr"
+    - name: mastodon
+      url: "https://mastodon.social/@hexagr"
+    - name: spotify
+      url: "https://open.spotify.com/user/9z8szmfko3ibkbzv062di4hna"
+    - name: gitlab
+      url: "https://gitlab.com/hexagr"
+    - name: rss
+      url: "feed.xml"
+
+  socialAccounts:
+    twitter:
+      username: hexagr
+
+  homeInfoParams:
+    Title: "The Kraken sleepeth;"      
+    Content: |+
+  
+  #commentSystems:
+  #  disqus:
+  #    shortname: reorx
+  #  remark42:
+  #    url: https://remark42.reorx.com
+  #    site: reorx.github.io
+  #  telegramWidget:
+  #    channel: reorx_share
+  #    accentColor: "9077e1"
+  #    limit: 20
+  #defaultCommentSystems:
+  #  remark42: true
+
+permalinks:
+  notes: /:section/:year/:month/:slugorfilename
+
+# prefer feed.xml rather than index.xml
+outputFormats:
+  RSS:
+    mediatype: "application/rss"
+    baseName: "feed"
+
+minify:
+  disableXML: true
+
+menu:
+  main:
+    - name: Posts
+      url: /posts/
+      weight: 1
+    - name: Newsletter
+      url: /newsletter/
+      weight: 3
+    - name: Archive
+      url: /archive/
+      weight: 4
+    - name: About
+      url: /about/
+      weight: 5
+
+languages:
+  en:
+    languageName: "English"
+
+
+
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: false
+  highlight:
+    style: "tango"
+    codeFences: true
+    lineNos: false
+    noClasses: false
+
+
+
+
