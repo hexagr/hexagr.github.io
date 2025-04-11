@@ -3,6 +3,7 @@ baseURL: "https://hexagram.foo"
 theme: PaperMod
 enableRobotsTXT: true
 enableEmoji: true
+publishDir: gh-pages
 
 params:
   profileMode:
