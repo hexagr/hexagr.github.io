@@ -26,7 +26,7 @@ tl;dr when a `syscall` instruction runs, the CPU switches from usermode to kerne
 
 ![modes](/modes.jpg)
 
-For example, we can see this artifact here—if I write some code in userland that uses the following functions, `CreateFileA` and `WriteFile`:
+For example, we can see this artifact here—if I write some code in userland that uses the following Win32 API functions, `CreateFileA` and `WriteFile`:
 
 ```C
 #include <stdio.h>
