@@ -1,0 +1,184 @@
+:root {
+    --gap: 24px;
+    --content-gap: 20px;
+    --nav-width: 1024px;
+    --main-width: 720px;
+    --header-height: 60px;
+    --footer-height: 60px;
+    --radius: 8px;
+    --theme: rgb(255, 255, 255);
+    --entry: rgb(255, 255, 255);
+    --primary: rgb(30, 30, 30);
+    --secondary: rgb(108, 108, 108);
+    --tertiary: rgb(214, 214, 214);
+    --content: rgb(31, 31, 31);
+    /*--code-block-bg: rgb(28, 29, 33);*/
+    --code-block-bg: #f2f2f2;
+    --code-bg: rgb(245, 245, 245);
+    --border: rgb(238, 238, 238);
+}
+
+.dark {
+    --theme: rgb(29, 30, 32);
+    --entry: rgb(46, 46, 51);
+    --primary: rgb(218, 218, 219);
+    --secondary: rgb(155, 156, 157);
+    --tertiary: rgb(65, 66, 68);
+    --content: rgb(196, 196, 197);
+    --code-block-bg: rgb(46, 46, 51);
+    --code-bg: rgb(55, 56, 62);
+    --border: rgb(51, 51, 51);
+}
+
+.list {
+    background: var(--code-bg);
+}
+
+.dark.list {
+    background: var(--theme);
+}
+
+
+/* typography */
+
+body p {
+    text-align: justify;
+}
+
+
+.post-content blockquote {
+    border-inline-start: 5px solid #fa5e55;
+}
+
+.dark .post-content blockquote {
+    border-inline-start: 5px solid #87d949;
+}
+
+.footnotes p {
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    font-size: 14px;
+    margin: 0px 0px 0px 0px;
+}
+
+.footnote-backref {
+    margin-left: 15px;
+}
+
+.footnotes ol {
+    margin-left: 0px;
+    margin-right: 1px;
+}
+
+
+.footnotes li {
+    transition: background-color 0.2s ease;
+    padding: 5px 5px 5px 5px;
+    margin: 5px 5px 5px 5px;
+    font-size: 15px;
+    
+}
+
+.footnotes li.highlighted {
+    background-color: rgba(252, 234, 38, 0.3);
+    margin: 0px;
+}
+
+.footnotes li.highlighted-active {
+    background-color: rgba(252, 234, 38, 0.3); /* More intense highlight when in view */
+
+}
+
+.dark .footnotes li.highlighted {
+    background-color: rgba(255, 233, 224, 0.2);
+}
+
+.dark .footnotes li.highlighted-active {
+    background-color: rgba(255, 233, 224, 0.2); /* More intense highlight when in view */
+}
+
+
+/* exclude code blocks from being justified */
+
+pre, code {
+    text-align: left;
+}
+
+
+
+/* touch up ordered and unordered lists */
+
+ul {
+    line-height: 2.0;
+}
+
+ol {
+    line-height: 2.0;
+}
+
+
+
+/* touch up superscript */
+
+sup a {
+    font-size: 0.8em; 
+    vertical-align: super; 
+    margin-left: 0.2em; 
+    margin-right: 0.2em; 
+    color: #fa5e55
+}
+
+
+
+.post-content table th, .post-content table:not(.highlighttable,.highlight table,.gist .highlight) td {
+    font-size: 17px;
+
+}
+
+/* dark mode superscript a href */
+
+.dark sup a {
+    color: #87d949; 
+}
+
+
+
+/* touch up the highlighter text color */
+.dark .post-content .cl {
+    color: #fff;
+}
+
+.post-content .cl {
+    color:#000;
+}
+
+/* touching up console sessions doesn't work? */
+
+
+/* dark theme - inline <code> */
+
+.dark .post-content p code {
+    color: #87d949;
+}
+
+ /* light theme - inline <code> */
+.post-content p code {
+    color: #fa5e55;
+}
+
+.post-content a {
+    color: #fa5e55;
+}
+
+
+.dark .post-content p a {
+    color: #87d949;
+}
+
+
+
+/* Disable smooth scrolling */
+html {
+  scroll-behavior: auto !important;
+}
+
