@@ -13,7 +13,7 @@ One trick I’ve been playing with is writing shellcode to the Windows registry 
 
 >Windows gives each user-mode application a block of virtual addresses. This is known as the user space of that application. The other large block of addresses, known as system space or kernel space, cannot be directly accessed by the application.
 
-To request a service from the kernel (like reading a file or opening a process), a user-mode program must make a system call using the `syscall` instruction. This tells the kernel which function it needs by placing a System Service Number or SSN in the `eax` register.  
+To request a service from the kernel (like reading a file or opening a process), a usermode program must make a system call using the `syscall` instruction. This tells the kernel which function it needs by placing a System Service Number or SSN in the `eax` register.  
 
 The SSN is basically an index in a table known as the [system service descriptor table](https://en.wikipedia.org/wiki/System_Service_Descriptor_Table), where each number points to a different kernel function. For example:  
 - `eax = 0` -> Calls the 1st function in the table  
@@ -22,7 +22,9 @@ The SSN is basically an index in a table known as the [system service descriptor
 
 The kernel finds the function using: `function_address = SSDT_base + (System Service Number)`  
 
-tl;dr when a `syscall` instruction runs, the CPU switches from user-mode to kernel mode, and the system call handler uses the system service number in `eax` to execute the correct function.  
+tl;dr when a `syscall` instruction runs, the CPU switches from usermode to kernel mode, and the system call handler uses the system service number in `eax` to execute the correct function.  
+
+![modes](/modes.jpg)
 
 For example, we can see this artifact here—if I write some code in userland that uses the following functions, `CreateFileA` and `WriteFile`:
 
@@ -80,7 +82,7 @@ int main() {
 }
 ```
 
-This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see that it *actually* does something else. And at the end it actually calls a less documented system call under the hood, `NtWriteFile`—which resides in `ntdll.dll`.
+This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see that it *actually* does something else. And at the end it actually calls a less documented system call under the hood, `NtWriteFile`—a Native API call which resides in `ntdll.dll`.
 
 ```asm
 mov r10,rcx                     | NtWriteFile
@@ -90,7 +92,7 @@ jne ntdll.7FFF055AEE55          |
 syscall                         |
 ret                   
 ```
-In this blog post, we'll use indirect syscalls which leverage the Native API. In a future blog post, we'll cover making some changes in our setup to unhook these functions.
+In this blog post, we'll use indirect syscalls which leverage native functions within `ntdll.dll`. In a future blog post, we'll cover making some changes in our setup to unhook these functions for potentially increased stealth.
 
 ## For You and Me
 
