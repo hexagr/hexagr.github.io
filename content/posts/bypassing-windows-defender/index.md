@@ -84,9 +84,11 @@ int main() {
 }
 ```
 
-This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see that it *actually* does something else. And at the end it actually calls a less documented system call under the hood, `NtWriteFile`—a Native API call which resides in `ntdll.dll`.
+This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see that it *actually* does something else. And it actually calls system calls under the hood, `NtCreateFile` and `NtWriteFile`—Native API calls which reside in `ntdll.dll`.
+
 
 ```asm
+//snipped
 mov r10,rcx                     | NtWriteFile
 mov eax,8                       |
 test byte ptr ds:[7FFE0308],1   |
