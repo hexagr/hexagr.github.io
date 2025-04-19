@@ -84,7 +84,9 @@ int main() {
 }
 ```
 
-This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see that it *actually* does something else. It really makes system calls under the hood, courtesy of indirect calls to `NtCreateFile` and `NtWriteFile`—Native API calls which reside in `ntdll.dll`.
+This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see something else: under the hood, these functions invoke `NtCreateFile` and `NtWriteFile`—Native API stubs in `ntdll.dll` that set up registers and issue the actual syscall.  
+
+`CreateFileA` is a high-level wrapper over the Native API. It handles things like ANSI/unicode conversion, then delegates to `NtCreateFile`, which prepares the registers and triggers the syscall.
 
 The native calls reach out to the System Service Descriptor Table, which holds an an array of offsets to kernel system calls: 
 
@@ -97,7 +99,7 @@ typedef struct tagSERVICE_DESCRIPTOR_TABLE {
 } SERVICE_DESCRIPTOR_TABLE;
 ```
 
-So, calls to functions in `ntdll.dll` in turn get converted to low-level calls like `ZwCreateFile` and `ZwWriteFile`, courtesy of the index we pass to `ntdll.dll` and the syscall.
+So, calls to functions in `ntdll.dll` in turn get [converted to low-level calls](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-zwwritefile) like `ZwCreateFile` and `ZwWriteFile`, courtesy of the index we pass to `ntdll.dll` and the syscall.
 
 
 ```asm
@@ -109,7 +111,7 @@ jne ntdll.7FFF055AEE55          |
 syscall                         |
 ret                   
 ```
-In this blog post, we'll use indirect syscalls which leverage native functions within `ntdll.dll`. In a future blog post, we'll cover making some changes in our setup to unhook these functions for potentially increased stealth.
+In this blog post, we'll use indirect syscalls which leverage native functions within `ntdll.dll`, avoiding certain calls to the Win32 API. In a future blog post, we'll cover making some changes in our setup to further unhook these functions for potentially increased stealth.
 
 ## For You and Me
 
