@@ -86,6 +86,19 @@ int main() {
 
 This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see that it *actually* does something else. It really makes system calls under the hood, courtesy of indirect calls to `NtCreateFile` and `NtWriteFile`—Native API calls which reside in `ntdll.dll`.
 
+The native calls reach out to the System Service Descriptor Table, which holds an an array of offsets to kernel system calls: 
+
+```C
+typedef struct tagSERVICE_DESCRIPTOR_TABLE {
+    SYSTEM_SERVICE_TABLE nt; //effectively a pointer to Service Dispatch Table (SSDT) itself
+    SYSTEM_SERVICE_TABLE win32k;
+    SYSTEM_SERVICE_TABLE sst3; //pointer to a memory address that contains how many routines are defined in the table
+    SYSTEM_SERVICE_TABLE sst4;
+} SERVICE_DESCRIPTOR_TABLE;
+```
+
+So, calls to functions in `ntdll.dll` in turn get converted to low-level calls like `ZwCreateFile` and `ZwWriteFile`, courtesy of the index we pass to `ntdll.dll` and the syscall.
+
 
 ```asm
 //snipped
