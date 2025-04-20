@@ -5,7 +5,7 @@ categories: [windows, c, programming, malware,red team]
 tags: [windows, c, programming, malware,red team]
 excerpt: 
 ---
-Lately I've been poking around at Windows internals and writing low level code. This morning I thought I'd try to bypass Windows Defender and try to get a low score on Virus Total.
+Lately I've been poking around at Windows internals and writing low level code. This morning I thought I'd try to bypass Windows Defender *and* get a low score on Virus Total.
 
 One trick I’ve been playing with is writing shellcode to the Windows registry to keep things “fileless.” It’s not super fancy, but it’s kind of neat. I combined that with indirect syscalls and some cryptographic routines to get Windows Defender to chill out.
 
