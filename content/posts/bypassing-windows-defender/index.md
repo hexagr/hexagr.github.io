@@ -684,17 +684,17 @@ int main() {
 
 ## Profit?
 
-Alright, let's check the score board. Are we able to successfully read and write to the registry and execute shellcode without Windows Defender complaining?
+Alright, let's check the scoreboard. Are we able to successfully read and write to the registry and execute shellcode without Windows Defender complaining?
 
 ![Calculator](/defender.png)
 
-Looks good. Let's see how many antivirus vendors detect our code. Ahh, only ten of of 72! That's not bad. But we could also do better!
+Looks good. Let's see how many antivirus vendors detect our code. Ahh, only ten out of 72! That's not bad. But we could also do better!
 
 ![VirusTotal](/virustotal.png)
 
 Next post!
 
-Proof of concept on Github: [RegistryGhost](https://github.com/hexagr/RegistryGhost)
+Proof of concept: [RegistryGhost](https://github.com/hexagr/RegistryGhost)
 
 ##
 
