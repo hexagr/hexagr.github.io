@@ -23,7 +23,9 @@ The SSN is basically an index in a table known as the [system service descriptor
 
 The kernel finds the function using: `function_address = SSDT_base + (System Service Number)`  
 
-tl;dr when a `syscall` instruction runs, the CPU switches from usermode to kernel mode, and the system call handler uses the system service number in `eax` to execute the correct function.  
+tl;dr when a `syscall` instruction runs, the CPU switches from usermode to kernel mode, and the system call handler uses the system service number in `eax` to execute the correct function. 
+
+Usermode functions then, in many cases, reach out to `ntdll.dll`, which in turn call into the kernel image, `ntoskrnl.exe`.
 
 ![modes](/modes.jpg)
 
@@ -87,9 +89,11 @@ int main() {
 
 This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [compile this code](https://hexagr.blogspot.com/2023/08/windows.html) and step through it in a debugger or decompiler, we'll see something else: under the hood, these functions invoke `NtCreateFile` and `NtWriteFile`—Native API stubs in `ntdll.dll` that set up registers and issue the actual syscall.  
 
-`CreateFileA` is a high-level wrapper over the Native API. It handles things like ANSI/unicode conversion, then delegates to `NtCreateFile`, which prepares the registers and triggers the syscall.
+`CreateFileA` is a high-level wrapper over the Native API. It handles things like ANSI/unicode conversion, then delegates to `NtCreateFile`, which prepares the registers and triggers the syscall within `ntoskrnl.exe`.
 
-The native calls reach out to the System Service Descriptor Table, which holds an an array of offsets to kernel system calls: 
+>Nt or Zw are system calls declared in ntdll.dll and ntoskrnl.exe. When called from ntdll.dll in user mode, these groups are almost exactly the same; they trap into kernel mode and call the equivalent function in [ntoskrnl.exe](https://en.wikipedia.org/wiki/Ntoskrnl.exe) via the SSDT. When calling the functions directly in ntoskrnl.exe (only possible in kernel mode), the Zw variants ensure kernel mode, whereas the Nt variants do not.
+
+So, native calls reach out to the System Service Descriptor Table (SSDT), which holds an an array of offsets to kernel system calls: 
 
 ```C
 typedef struct tagSERVICE_DESCRIPTOR_TABLE {
