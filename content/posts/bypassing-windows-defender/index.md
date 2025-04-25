@@ -93,7 +93,7 @@ This code uses the userland hooks `CreateFileA` and `WriteFile`. But if we [comp
 
 >Nt or Zw are system calls declared in ntdll.dll and ntoskrnl.exe. When called from ntdll.dll in user mode, these groups are almost exactly the same; they trap into kernel mode and call the equivalent function in [ntoskrnl.exe](https://en.wikipedia.org/wiki/Ntoskrnl.exe) via the SSDT. When calling the functions directly in ntoskrnl.exe (only possible in kernel mode), the Zw variants ensure kernel mode, whereas the Nt variants do not.
 
-So, native calls reach out to the System Service Descriptor Table (SSDT), which holds an an array of offsets to kernel system calls: 
+So, native calls reach out to the System Service Descriptor Table (SSDT), which holds an array of offsets to kernel system calls: 
 
 ```C
 typedef struct tagSERVICE_DESCRIPTOR_TABLE {
