@@ -240,7 +240,7 @@ Now that we have type definitions to use with some of our `ntdll.dll` calls late
 
 Side note: I’ve already XOR’d the payload before embedding it in the program. We’ll reverse the XOR just before execution.
 
-So, beyond our shellcode, we'll use the following constructions: an AES encryption routine, an AES decryption routine, a reverse XOR routine, functions to write and read to the Windows registry, and indirect system calls for allocating read-write-execute memory and spinning up new process threads. 
+So, beyond our shellcode, we'll use the following constructions: an AES encryption routine, an AES decryption routine, a reverse XOR routine, functions to read from and write to the Windows registry, and indirect system calls for allocating read-write-execute memory and spinning up new process threads. 
 
 But first, our AES routines. We generate our encryption key using the username of the current user. If the username is less than 16 characters, we just pad it with `0x01`. We then follow the conventions for using the BCrypt API from Microsoft[^4].
 
