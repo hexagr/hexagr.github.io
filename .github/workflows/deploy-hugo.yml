@@ -54,7 +54,7 @@ jobs:
           HUGO_ENVIRONMENT: production
         run: |
           rm -rf public/
-          hugo --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+          hugo --minify --baseURL "https://hexagram.foo/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
