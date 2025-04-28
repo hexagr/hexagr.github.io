@@ -1,5 +1,5 @@
 title: Stephan Bridger
-baseURL: "https://hexagram.foo"
+baseURL: "https://hexagram.foo/"
 theme: PaperMod
 enableRobotsTXT: true
 enableEmoji: true

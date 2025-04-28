@@ -9,7 +9,7 @@
       <url>http://localhost:1313/fog.jpeg</url>
       <link>http://localhost:1313/fog.jpeg</link>
     </image>
-    <generator>Hugo -- 0.145.0</generator>
+    <generator>Hugo -- 0.147.0</generator>
     <language>en</language>
     <lastBuildDate>Sun, 03 Sep 2023 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/categories/csharp/feed.xml" rel="self" type="application/rss+xml" />
