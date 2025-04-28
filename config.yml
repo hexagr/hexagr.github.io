@@ -94,7 +94,7 @@ params:
   #  remark42: true
 
 permalinks:
-  notes: /:section/:year/:month/:slugorfilename
+  notes: /:section/:year/:month/:slugorcontentbasename
 
 outputs:
   home:

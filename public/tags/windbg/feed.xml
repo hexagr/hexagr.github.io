@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Windbg on Stephan Bridger</title>
-    <link>http://localhost:1313/tags/windbg/</link>
+    <link>https://hexagram.foo/tags/windbg/</link>
     <description>Recent content in Windbg on Stephan Bridger</description>
     <image>
       <title>Stephan Bridger</title>
-      <url>http://localhost:1313/fog.jpeg</url>
-      <link>http://localhost:1313/fog.jpeg</link>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
     </image>
     <generator>Hugo -- 0.147.0</generator>
     <language>en</language>
     <lastBuildDate>Sat, 02 Sep 2023 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/windbg/feed.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://hexagram.foo/tags/windbg/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Finding Active Processes with Windbg</title>
-      <link>http://localhost:1313/posts/finding-active-processes-with-windbg/</link>
+      <link>https://hexagram.foo/posts/finding-active-processes-with-windbg/</link>
       <pubDate>Sat, 02 Sep 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/finding-active-processes-with-windbg/</guid>
+      <guid>https://hexagram.foo/posts/finding-active-processes-with-windbg/</guid>
       <description>&lt;p&gt;In the Windows kernel, each process is assigned an EPROCESS structure, which is a kernel object that represents a program or process. And a Process Environment Block (PEB) is just one of many structures pointed to by the EPROCESS structure.  A snippet from &lt;code&gt;_EPROCESS&lt;/code&gt; as documented on Vergilius Project:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-C&#34; data-lang=&#34;C&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;volatile&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ULONGLONG&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;OwnerProcessId&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PEB&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Peb&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;

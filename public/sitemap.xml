@@ -2,161 +2,161 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/posts/bypassing-windows-defender/</loc>
+    <loc>https://hexagram.foo/posts/bypassing-windows-defender/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/c/</loc>
+    <loc>https://hexagram.foo/categories/c/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/c/</loc>
+    <loc>https://hexagram.foo/tags/c/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://hexagram.foo/categories/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/malware/</loc>
+    <loc>https://hexagram.foo/categories/malware/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/malware/</loc>
+    <loc>https://hexagram.foo/tags/malware/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
+    <loc>https://hexagram.foo/posts/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/programming/</loc>
+    <loc>https://hexagram.foo/categories/programming/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/programming/</loc>
+    <loc>https://hexagram.foo/tags/programming/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/red-team/</loc>
+    <loc>https://hexagram.foo/categories/red-team/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/red-team/</loc>
+    <loc>https://hexagram.foo/tags/red-team/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>https://hexagram.foo/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>https://hexagram.foo/tags/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/windows/</loc>
+    <loc>https://hexagram.foo/categories/windows/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/windows/</loc>
+    <loc>https://hexagram.foo/tags/windows/</loc>
     <lastmod>2025-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/cpp/</loc>
+    <loc>https://hexagram.foo/categories/cpp/</loc>
     <lastmod>2025-03-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/cpp/</loc>
+    <loc>https://hexagram.foo/tags/cpp/</loc>
     <lastmod>2025-03-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/extracting-windows-wifi-profiles/</loc>
+    <loc>https://hexagram.foo/posts/extracting-windows-wifi-profiles/</loc>
     <lastmod>2025-03-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/networking/</loc>
+    <loc>https://hexagram.foo/categories/networking/</loc>
     <lastmod>2025-03-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/networking/</loc>
+    <loc>https://hexagram.foo/tags/networking/</loc>
     <lastmod>2025-03-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/wifi/</loc>
+    <loc>https://hexagram.foo/categories/wifi/</loc>
     <lastmod>2025-03-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/wifi/</loc>
+    <loc>https://hexagram.foo/tags/wifi/</loc>
     <lastmod>2025-03-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/development/</loc>
+    <loc>https://hexagram.foo/categories/development/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/development/</loc>
+    <loc>https://hexagram.foo/tags/development/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/elf/</loc>
+    <loc>https://hexagram.foo/categories/elf/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/elf/</loc>
+    <loc>https://hexagram.foo/tags/elf/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/infecting-linux-elf-files/</loc>
+    <loc>https://hexagram.foo/posts/infecting-linux-elf-files/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/linux/</loc>
+    <loc>https://hexagram.foo/categories/linux/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/linux/</loc>
+    <loc>https://hexagram.foo/tags/linux/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/research/</loc>
+    <loc>https://hexagram.foo/categories/research/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/research/</loc>
+    <loc>https://hexagram.foo/tags/research/</loc>
     <lastmod>2025-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/a-sideblog-on-blogspot/</loc>
+    <loc>https://hexagram.foo/posts/a-sideblog-on-blogspot/</loc>
     <lastmod>2023-09-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/blogspot/</loc>
+    <loc>https://hexagram.foo/categories/blogspot/</loc>
     <lastmod>2023-09-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/note/</loc>
+    <loc>https://hexagram.foo/tags/note/</loc>
     <lastmod>2023-09-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/sideblog/</loc>
+    <loc>https://hexagram.foo/categories/sideblog/</loc>
     <lastmod>2023-09-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/sideblog/</loc>
+    <loc>https://hexagram.foo/tags/sideblog/</loc>
     <lastmod>2023-09-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/csharp/</loc>
+    <loc>https://hexagram.foo/categories/csharp/</loc>
     <lastmod>2023-09-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/csharp/</loc>
+    <loc>https://hexagram.foo/tags/csharp/</loc>
     <lastmod>2023-09-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/process-enumeration/</loc>
+    <loc>https://hexagram.foo/categories/process-enumeration/</loc>
     <lastmod>2023-09-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/process-enumeration/</loc>
+    <loc>https://hexagram.foo/tags/process-enumeration/</loc>
     <lastmod>2023-09-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/using-c-sharp-to-enumerate-windows-processes/</loc>
+    <loc>https://hexagram.foo/posts/using-c-sharp-to-enumerate-windows-processes/</loc>
     <lastmod>2023-09-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/finding-active-processes-with-windbg/</loc>
+    <loc>https://hexagram.foo/posts/finding-active-processes-with-windbg/</loc>
     <lastmod>2023-09-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/windbg/</loc>
+    <loc>https://hexagram.foo/categories/windbg/</loc>
     <lastmod>2023-09-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/windbg/</loc>
+    <loc>https://hexagram.foo/tags/windbg/</loc>
     <lastmod>2023-09-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/appsec/</loc>
+    <loc>https://hexagram.foo/categories/appsec/</loc>
     <lastmod>2021-09-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/appsec/</loc>
+    <loc>https://hexagram.foo/tags/appsec/</loc>
     <lastmod>2021-09-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/inference-side-channel-attacks/</loc>
+    <loc>https://hexagram.foo/posts/inference-side-channel-attacks/</loc>
     <lastmod>2021-09-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/security-theater-questions/</loc>
+    <loc>https://hexagram.foo/posts/security-theater-questions/</loc>
     <lastmod>2021-09-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/small-bugs-big-bugs/</loc>
+    <loc>https://hexagram.foo/posts/small-bugs-big-bugs/</loc>
     <lastmod>2021-09-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/about/</loc>
+    <loc>https://hexagram.foo/about/</loc>
   </url><url>
-    <loc>http://localhost:1313/archive/</loc>
+    <loc>https://hexagram.foo/archive/</loc>
   </url><url>
-    <loc>http://localhost:1313/newsletter/archive/</loc>
+    <loc>https://hexagram.foo/newsletter/archive/</loc>
   </url><url>
-    <loc>http://localhost:1313/newsletter/</loc>
+    <loc>https://hexagram.foo/newsletter/</loc>
   </url><url>
-    <loc>http://localhost:1313/search/</loc>
+    <loc>https://hexagram.foo/search/</loc>
   </url>
 </urlset>
