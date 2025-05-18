@@ -116,7 +116,13 @@ jne ntdll.7FFF055AEE55          |
 syscall                         |
 ret                   
 ```
-In this blog post, we'll use indirect syscalls which leverage native functions within `ntdll.dll`, avoiding certain calls to the Win32 API. In a future blog post, we'll cover making some changes in our setup to further unhook these functions for potentially increased stealth.
+In this blog post, we'll use indirect syscalls which leverage native functions within `ntdll.dll`, avoiding certain calls to the Win32 API. 
+
+Since `ntdll.dll` is available to every Windows process and provides the interface for user-mode programs to interact with kernel services, using system calls through ntdll.dll can help activity appear more legitimate. 
+
+If we bypassed ntdll.dll and directly called kernel functions, it could stick out, increasing the likelihood of being detected by security tools that monitor abnormal behavior.
+
+In a future blog post, we'll cover additional changes to our setup, including alternative approaches to enhancing stealth, such as unhooking.
 
 ## TypeDefs, For You and Me
 
