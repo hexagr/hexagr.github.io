@@ -43,7 +43,7 @@ Similarly, if the process returns true for the WOW64 check, we instead print WOW
 
  We iterate over the Windows process list after setting up a pointer to the process information buffer: `PSYSTEM_PROCESS_INFORMATION procInfo = (PSYSTEM_PROCESS_INFORMATION)buffer`
 
-For each unique process ID we see, we call `OpenProcess` [which takes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess]) a "Desired Access" key represented by a DWORD, a BOOLEAN indicating whether or not to inherit the handle -- we set this to false -- and last, our process ID, represented by a DWORD.
+For each unique process ID we see, we call `OpenProcess` [which takes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess) a "Desired Access" key represented by a DWORD, a BOOLEAN indicating whether or not to inherit the handle -- we set this to false -- and last, our process ID, represented by a DWORD.
 
 ```Cpp
 HANDLE OpenProcess(
