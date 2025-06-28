@@ -41,13 +41,17 @@
 
 /* typography */
 
-/* Basic paragraph styling */
 body p {
     text-align: justify;
     hyphens: auto;  /* Enable hyphenation */
-    text-justify: inter-word;  /* Ensure the justification adjusts word spacing */
-    word-wrap: break-word;  /* Handle long words that don't fit */
+    word-wrap: break-word;  /* Allows words to break */
+    overflow-wrap: break-word;  /* Handles word breaking better than word-wrap */
     line-height: 1.6;  /* Adjust line height for better readability */
+    word-spacing: -0.1em;  /* Adjust word spacing to avoid massive gaps */
+    text-justify: inter-word;  /* Ensure the justification adjusts word spacing */
+    text-align-last: justify;  /* Justifies the last line of the paragraph */
+    word-break: break-word;  /* Breaks long words instead of stretching them */
+    white-space: normal;  /* Allows wrapping */
 }
 
 /* Code blocks should stay unaffected by justification */
@@ -66,6 +70,8 @@ body p code {
         -webkit-hyphens: none;
     }
 }
+
+
 
 .post-content blockquote {
     border-inline-start: 5px solid #fa5e55;
