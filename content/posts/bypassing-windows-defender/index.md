@@ -455,7 +455,7 @@ However, even after *this*, we'll make one final effort to subvert Windows Defen
 
 In other words: we’re never writing to disk. Our shellcode lives only in memory, getting decrypted and XOR-decoded on the fly before execution.
 
-But how can we perform reads and writes against the Windows regstry? We'll need to use the `winreg` API from Microsoft.[^5] 
+But how can we perform reads and writes against the Windows registry? We'll need to use the `winreg` API from Microsoft.[^5] 
 
 First we'll make use of `RegOpenKeyExA` and `RegSetValueExA` since we want to write to the Window's registry. But we need somewhere to write! And we want to write to Control Panel, under the current running user's username. 
 
