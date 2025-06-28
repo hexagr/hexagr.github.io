@@ -62,6 +62,9 @@ body p code {
     body p {
         -webkit-hyphens: auto;  /* Safari prefix */
     }
+    body p code {
+        -webkit-hyphens: none;
+    }
 }
 
 .post-content blockquote {
