@@ -79,6 +79,18 @@ body p code {
 
 
 
+img {
+  max-width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  width: auto;
+}
+
+.footnotes li[id] {
+  scroll-margin-top: 50px; /* Adjust this value to be slightly more than your fixed header's height */
+}
+
+
+
 .post-content blockquote {
     border-inline-start: 5px solid #fa5e55;
 }

@@ -27,7 +27,7 @@ tl;dr when a `syscall` instruction runs, the CPU switches from usermode to kerne
 
 Usermode functions then, in many cases, reach out to `ntdll.dll`, which in turn call into the kernel image, `ntoskrnl.exe`.
 
-![modes](/modes.jpg)
+{{< inTextImg url="/modes.jpg" alt="VirusTotal" width="800" height="600">}}
 
 *Image from [Microsoft Press Store](https://www.microsoftpressstore.com/articles/article.aspx?p=2201301&seqNum=2) by Pearson*
 
@@ -694,11 +694,12 @@ int main() {
 
 Alright, let's check the scoreboard. Are we able to successfully read and write to the registry and execute shellcode without Windows Defender complaining?
 
-![Calculator](/defender.png)
+{{< inTextImg url="/defender.png" alt="Windows Defender" width="800" height="600">}}
 
 Looks good. Let's see how many antivirus vendors detect our code. Ahh, only ten out of 72! That's not bad. But we could also do better!
 
-![VirusTotal](/virustotal.png)
+{{< inTextImg url="/virustotal.png" alt="VirusTotal" width="800" height="600">}}
+
 
 Next post!
 
