@@ -57,7 +57,7 @@ HANDLE OpenProcess(
 
 Using this method, if we want to enumerate elevated processes, we must run the binary under a user with elevated privileges.
 
-We traverse the process list via `NextEntryOffset` which is a [part of](http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FSystem%20Information%2FStructures%2FSYSTEM_PROCESS_INFORMATION.html) the `SYSTEM_PROCESS_INFORMATION` structure -- we check each process ID against the WoW64 function, and then free our buffer and ntdll handle after completion.
+We traverse the process list via `NextEntryOffset` which is a [part of](http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FSystem%20Information%2FStructures%2FSYSTEM_PROCESS_INFORMATION.html) the SYSTEM_PROCESS_INFORMATION structure -- checking each process ID against the WoW64 function, then finally freeing our buffer and ntdll handle after completion.
 ```C
 int main() {
     // Check if *this* program is running under WOW64
