@@ -221,6 +221,8 @@ sup a {
 
 /* Disable smooth scrolling */
 html {
-  scroll-behavior: auto !important;
+  scroll-behavior: smooth !important;
+  scroll-padding-top: -500px
 }
+
 

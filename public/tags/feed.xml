@@ -2,141 +2,141 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on Stephan Bridger</title>
-    <link>http://localhost:1313/tags/</link>
+    <link>http://localhost:50490/tags/</link>
     <description>Recent content in Tags on Stephan Bridger</description>
     <image>
       <title>Stephan Bridger</title>
-      <url>http://localhost:1313/fog.jpeg</url>
-      <link>http://localhost:1313/fog.jpeg</link>
+      <url>http://localhost:50490/fog.jpeg</url>
+      <link>http://localhost:50490/fog.jpeg</link>
     </image>
     <generator>Hugo -- 0.147.8</generator>
     <language>en</language>
     <lastBuildDate>Sun, 11 May 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/feed.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:50490/tags/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Cpp</title>
-      <link>http://localhost:1313/tags/cpp/</link>
+      <link>http://localhost:50490/tags/cpp/</link>
       <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/cpp/</guid>
+      <guid>http://localhost:50490/tags/cpp/</guid>
       <description></description>
     </item>
     <item>
       <title>Programming</title>
-      <link>http://localhost:1313/tags/programming/</link>
+      <link>http://localhost:50490/tags/programming/</link>
       <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/programming/</guid>
+      <guid>http://localhost:50490/tags/programming/</guid>
       <description></description>
     </item>
     <item>
       <title>Windows</title>
-      <link>http://localhost:1313/tags/windows/</link>
+      <link>http://localhost:50490/tags/windows/</link>
       <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/windows/</guid>
+      <guid>http://localhost:50490/tags/windows/</guid>
       <description></description>
     </item>
     <item>
       <title>C</title>
-      <link>http://localhost:1313/tags/c/</link>
+      <link>http://localhost:50490/tags/c/</link>
       <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/c/</guid>
+      <guid>http://localhost:50490/tags/c/</guid>
       <description></description>
     </item>
     <item>
       <title>Malware</title>
-      <link>http://localhost:1313/tags/malware/</link>
+      <link>http://localhost:50490/tags/malware/</link>
       <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/malware/</guid>
+      <guid>http://localhost:50490/tags/malware/</guid>
       <description></description>
     </item>
     <item>
       <title>Red Team</title>
-      <link>http://localhost:1313/tags/red-team/</link>
+      <link>http://localhost:50490/tags/red-team/</link>
       <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/red-team/</guid>
+      <guid>http://localhost:50490/tags/red-team/</guid>
       <description></description>
     </item>
     <item>
       <title>Networking</title>
-      <link>http://localhost:1313/tags/networking/</link>
+      <link>http://localhost:50490/tags/networking/</link>
       <pubDate>Wed, 19 Mar 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/networking/</guid>
+      <guid>http://localhost:50490/tags/networking/</guid>
       <description></description>
     </item>
     <item>
       <title>Wifi</title>
-      <link>http://localhost:1313/tags/wifi/</link>
+      <link>http://localhost:50490/tags/wifi/</link>
       <pubDate>Wed, 19 Mar 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/wifi/</guid>
+      <guid>http://localhost:50490/tags/wifi/</guid>
       <description></description>
     </item>
     <item>
       <title>Development</title>
-      <link>http://localhost:1313/tags/development/</link>
+      <link>http://localhost:50490/tags/development/</link>
       <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/development/</guid>
+      <guid>http://localhost:50490/tags/development/</guid>
       <description></description>
     </item>
     <item>
       <title>ELF</title>
-      <link>http://localhost:1313/tags/elf/</link>
+      <link>http://localhost:50490/tags/elf/</link>
       <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/elf/</guid>
+      <guid>http://localhost:50490/tags/elf/</guid>
       <description></description>
     </item>
     <item>
       <title>Linux</title>
-      <link>http://localhost:1313/tags/linux/</link>
+      <link>http://localhost:50490/tags/linux/</link>
       <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/linux/</guid>
+      <guid>http://localhost:50490/tags/linux/</guid>
       <description></description>
     </item>
     <item>
       <title>Research</title>
-      <link>http://localhost:1313/tags/research/</link>
+      <link>http://localhost:50490/tags/research/</link>
       <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/research/</guid>
+      <guid>http://localhost:50490/tags/research/</guid>
       <description></description>
     </item>
     <item>
       <title>Note</title>
-      <link>http://localhost:1313/tags/note/</link>
+      <link>http://localhost:50490/tags/note/</link>
       <pubDate>Mon, 04 Sep 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/note/</guid>
+      <guid>http://localhost:50490/tags/note/</guid>
       <description></description>
     </item>
     <item>
       <title>Sideblog</title>
-      <link>http://localhost:1313/tags/sideblog/</link>
+      <link>http://localhost:50490/tags/sideblog/</link>
       <pubDate>Mon, 04 Sep 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/sideblog/</guid>
+      <guid>http://localhost:50490/tags/sideblog/</guid>
       <description></description>
     </item>
     <item>
       <title>Csharp</title>
-      <link>http://localhost:1313/tags/csharp/</link>
+      <link>http://localhost:50490/tags/csharp/</link>
       <pubDate>Sun, 03 Sep 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/csharp/</guid>
+      <guid>http://localhost:50490/tags/csharp/</guid>
       <description></description>
     </item>
     <item>
       <title>Process Enumeration</title>
-      <link>http://localhost:1313/tags/process-enumeration/</link>
+      <link>http://localhost:50490/tags/process-enumeration/</link>
       <pubDate>Sun, 03 Sep 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/process-enumeration/</guid>
+      <guid>http://localhost:50490/tags/process-enumeration/</guid>
       <description></description>
     </item>
     <item>
       <title>Windbg</title>
-      <link>http://localhost:1313/tags/windbg/</link>
+      <link>http://localhost:50490/tags/windbg/</link>
       <pubDate>Sat, 02 Sep 2023 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/windbg/</guid>
+      <guid>http://localhost:50490/tags/windbg/</guid>
       <description></description>
     </item>
     <item>
       <title>Appsec</title>
-      <link>http://localhost:1313/tags/appsec/</link>
+      <link>http://localhost:50490/tags/appsec/</link>
       <pubDate>Fri, 17 Sep 2021 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/appsec/</guid>
+      <guid>http://localhost:50490/tags/appsec/</guid>
       <description></description>
     </item>
   </channel>
