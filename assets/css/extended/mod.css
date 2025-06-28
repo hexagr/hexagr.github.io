@@ -49,9 +49,6 @@ body p {
     line-height: 1.6;  /* Adjust line height for better readability */
     word-spacing: -0.1em;  /* Adjust word spacing to avoid massive gaps */
     text-justify: inter-word;  /* Ensure the justification adjusts word spacing */
-    text-align-last: justify;  /* Justifies the last line of the paragraph */
-    word-break: break-word;  /* Breaks long words instead of stretching them */
-    white-space: normal;  /* Allows wrapping */
 }
 
 /* Code blocks should stay unaffected by justification */
