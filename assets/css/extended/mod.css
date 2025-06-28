@@ -41,31 +41,51 @@
 
 /* typography */
 
+
+
 /* Basic paragraph styling */
 body p {
     text-align: justify;
     hyphens: auto;  /* Enable hyphenation */
-    text-justify: inter-word;  /* Ensure the justification adjusts word spacing */
+    text-justify: inter-character;  /* Ensure justification adjusts word spacing */
     word-wrap: break-word;  /* Handle long words that don't fit */
-    line-height: 1.6;  /* Adjust line height for better readability */
+    line-height: 1.5;  /* Adjust line height for better readability (smaller value for tighter lines) */
+    letter-spacing: -0.03em; /* Slight negative spacing to tighten up gaps */
+    margin-bottom: 1rem; /* Adds a little space between paragraphs */
 }
- 
+
+body li {
+    text-align: justify;
+    hyphens: auto;  /* Enable hyphenation */
+    text-justify: inter-character;  /* Ensure justification adjusts word spacing */
+    word-wrap: break-word;  /* Handle long words that don't fit */
+    line-height: 1.5;  /* Adjust line height for better readability (smaller value for tighter lines) */
+    letter-spacing: -0.03em; /* Slight negative spacing to tighten up gaps */
+    margin-bottom: 1rem; /* Adds a little space between paragraphs */
+}
+
+
 /* Code blocks should stay unaffected by justification */
 body p code {
     hyphens: none;  /* Don't hyphenate code */
     text-align: left;  /* Ensure code stays left-aligned */
     text-justify: none;  /* No justification on code */
 }
-    
+
 /* Support for older Safari versions */
 @supports (-webkit-hyphens: auto) {
     body p {
         -webkit-hyphens: auto;  /* Safari prefix */
+        hyphens: auto;
+        -moz-hyphens; auto;
     }
     body p code {
         -webkit-hyphens: none;
+        -moz-hyphens: none;
+        hyphens: none;
     }
 }
+
 
 
 .post-content blockquote {

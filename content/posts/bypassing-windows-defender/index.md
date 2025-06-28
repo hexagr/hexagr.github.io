@@ -133,7 +133,7 @@ To improve our chances of flying under the radar, we can use some alternative us
 
 But to do this, we'll need some initial declarations. These are the type definitions we'll use for Native API functions. We start with the `_PS_ATTRIBUTE` for process and thread creation[^1], along with unicode handling, process attributes, and identification for processes and threads.
 
-We also define the types we’ll need for indirect calls to allocate memory[^2] and spin up new process threads[^3], using `pNtAllocateVirtualMemory`, `pNtCreateThreadEx`, and `pNtWaitForSingleObject`, respectively.
+We also define the types we’ll need for indirect calls to allocate memory[^2] and spin up new process threads[^3], which we'll do using pNtAllocateVirtualMemory, pNtCreateThreadEx, and pNtWaitForSingleObject, respectively.
 
 
 ```C
@@ -459,7 +459,7 @@ But how can we perform reads and writes against the Windows regstry? We'll need 
 
 First we'll make use of `RegOpenKeyExA` and `RegSetValueExA` since we want to write to the Window's registry. But we need somewhere to write! And we want to write to Control Panel, under the current running user's username. 
 
-So, before we read or write, we'll get the username from the current environment and append it to the write operation under the HKEY `Control Panel` -- this way when we do write out, it will be under `HKEY_CURRENT_USER\Control Panel\Username`. 
+So, before we read or write, we'll get the username from the current environment and append it to the write operation under the HKEY `Control Panel` -- this way when we do write out, it will be within the registry key `\Control Panel\Username` under `HKEY_CURRENT_USER`. 
 
 And afterward, we use `RegQueryValueExA` to do the opposite operation, querying and reading the registry key we've written.
 
@@ -536,9 +536,7 @@ Alright, now we're close. We need to make use of the type definitions for indire
 
 We get the function pointers to allocate and protect virtual memory, as well as to spin a new thread and wait for it to launch. And our epilogue will use the `NtFreeVirtualMemory` function to free our objects when we're done.
 
-So, fundamentally what we're doing is dropping our now decrypted and XOR decoded shellcode into read-write-execute memory via ntdll calls for evasion.
-
-Our process spins up as a new thread in our current process-- then we wait for it to finish. 
+So, fundamentally what we're doing is dropping our now decrypted and XOR decoded shellcode into read-write-execute memory via ntdll calls for evasion. Lastly, our process spins up as a new thread in our current process--then we wait for it to finish. 
 
 And the resulting shellcode that's launched effectively forks off from our current process. After this, we clean up our memory and bail out cleanly.
 
@@ -633,10 +631,10 @@ void ExecuteShellcode(BYTE* shellcode, SIZE_T size) {
 ```
 So, to recap and tie all of it together. 
 
-1) We use the current username the process is running under as a cryptographic key for our AES routines. 
-2) We encrypt our shellcode and write this out to the Windows registry. 
-3) Then we read it back out using the AES decryption routine before calling the function to actually execute the shellcode.
-4) Finally, in `ExecuteShellcode` we reverse the XOR just before running the shellcode. We spin up a new thread and wait with `NtWaitForSingleObject` -- if all goes well, we get a fresh `calc.exe` and Windows Defender doesn't yell at us!
+1) We use the current username the process is running under as a cryptographic key for our AES routines to encrypt our shellcode and write this out to the Windows registry. 
+2) Then we read it back out, performing decryption before calling the function to actually execute the shellcode.
+3) Finally, in `ExecuteShellcode` we reverse the XOR encoding just before copying the shellcode to executable memory and attempting to execute it. 
+4) We spin up a new thread and wait with `NtWaitForSingleObject` -- if all goes well, we get a fresh `calc.exe` and Windows Defender doesn't yell at us!
 ```C
 
 int main() {
