@@ -41,23 +41,22 @@
 
 /* typography */
 
+/* Basic paragraph styling */
 body p {
     text-align: justify;
     hyphens: auto;  /* Enable hyphenation */
-    word-wrap: break-word;  /* Allows words to break */
-    overflow-wrap: break-word;  /* Handles word breaking better than word-wrap */
-    line-height: 1.6;  /* Adjust line height for better readability */
-    word-spacing: -0.1em;  /* Adjust word spacing to avoid massive gaps */
     text-justify: inter-word;  /* Ensure the justification adjusts word spacing */
+    word-wrap: break-word;  /* Handle long words that don't fit */
+    line-height: 1.6;  /* Adjust line height for better readability */
 }
-
+ 
 /* Code blocks should stay unaffected by justification */
 body p code {
     hyphens: none;  /* Don't hyphenate code */
     text-align: left;  /* Ensure code stays left-aligned */
     text-justify: none;  /* No justification on code */
 }
-
+    
 /* Support for older Safari versions */
 @supports (-webkit-hyphens: auto) {
     body p {
@@ -67,7 +66,6 @@ body p code {
         -webkit-hyphens: none;
     }
 }
-
 
 
 .post-content blockquote {
