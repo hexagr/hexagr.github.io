@@ -538,7 +538,7 @@ We get the function pointers to allocate and protect virtual memory, as well as 
 
 So, fundamentally what we're doing is dropping our now decrypted and XOR decoded shellcode into read-write-execute memory via ntdll calls for evasion. Lastly, our process spins up as a new thread in our current process--then we wait for it to finish. 
 
-And the resulting shellcode that's launched effectively forks off from our current process. After this, we clean up our memory and bail out cleanly.
+And the resulting shellcode that's launched starts `calc.exe`, effectively forking off from our current process. After this, we clean up our memory and bail out cleanly.
 
 
 ```C
