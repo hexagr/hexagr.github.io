@@ -41,6 +41,11 @@
 
 /* typography */
 
+
+.article.post-entry p {
+    all: unset; /* This removes all styles */
+}
+
 /* Basic paragraph styling */
 body p {
     text-align: justify;
@@ -56,7 +61,7 @@ body p {
     }
 }
 
-ul {
+body ul {
     text-align: justify;
     hyphens: auto;  /* Enable hyphenation */
     text-justify: inter-character;  /* Ensure justification adjusts word spacing */
@@ -68,7 +73,7 @@ ul {
 
 
 
-ol {
+body ol {
     text-align: justify;
     hyphens: auto;  /* Enable hyphenation */
     text-justify: inter-character;  /* Ensure justification adjusts word spacing */
