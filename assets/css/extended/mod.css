@@ -42,8 +42,8 @@
 /* typography */
 
 
-.article.post-entry p {
-    all: unset; /* This removes all styles */
+.post-entry p {
+    all: unset;
 }
 
 /* Basic paragraph styling */
