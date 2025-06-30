@@ -143,7 +143,7 @@ body p code {
 
 .footnotes li.highlighted {
     background-color: rgba(252, 234, 38, 0.3);
-    margin: 0px;
+    margin: 5px;
 }
 
 .footnotes li.highlighted-active {
