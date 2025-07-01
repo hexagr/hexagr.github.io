@@ -46,6 +46,8 @@
     all: unset;
 }
 
+/* Sigh, Typography */
+
 /* Basic paragraph styling */
 body p {
     text-align: justify;
