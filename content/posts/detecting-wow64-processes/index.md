@@ -65,9 +65,9 @@ HANDLE OpenProcess(
 );
 ```
 
-`PROCESS_QUERY_LIMITED_INFORMATION` is the desired access we want and what we pass to `NtQuerySystemInformation`. This way, as a standard user, we won't get errors if we hit an elevated system process. 
+The access level we want to use is `PROCESS_QUERY_LIMITED_INFORMATION`. This allows us to query processes from a standard user account without encountering errors, even when dealing with elevated system processes.
 
-Using this method, if we want to enumerate elevated processes, we must run the binary under a user with elevated privileges.
+Using this method, in order to enumerate elevated processes, the binary must be run with elevated privileges.
 
 Putting it all together, we traverse the process list via `NextEntryOffset`, [part](http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FSystem%20Information%2FStructures%2FSYSTEM_PROCESS_INFORMATION.html) of the SYSTEM_PROCESS_INFORMATION structure -- checking each process ID against the WoW64 function, then finally freeing our buffer and ntdll handle after completion.
 ```C
