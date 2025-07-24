@@ -86,11 +86,6 @@ body ol {
 }
 
 
-
-
-
-
-
 /* Code blocks should stay unaffected by justification */
 body p code {
     hyphens: none;  /* Don't hyphenate code */
@@ -98,8 +93,11 @@ body p code {
     text-justify: none;  /* No justification on code */
     -webkit-hyphens: none;
     -moz-hyphens: none;
-    hyphens: none;
     }
+}
+
+body ul code {
+    hyphens: none;
 }
 
 
