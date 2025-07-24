@@ -125,7 +125,7 @@ int main() {
 
 As seen below, one process is running in WoW64 mode on my vanilla Windows installation: 
 
-```shell
+```text
 //snipped
 [x64] vshost.exe (PID: 3300)
 [WOW64] vcpkgsrv.exe (PID: 7144)
