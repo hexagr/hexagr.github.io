@@ -1,41 +1,41 @@
 <!doctype html><html lang=en dir=auto><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="noindex, nofollow"><title>Extracting Windows WiFi Profiles | Stephan Bridger</title><meta name=keywords content="windows,cpp,wifi,networking"><meta name=description content="wifiExtract
 The other day my grandmother forgot her Windows WiFi SSID and password when she wanted to share it with a friend. So I thought if I could just automate the retrieval of her wireless profiles, she would never forget them again in the future.
-It turns out, the Windows API offers a nice way to enumerate WLAN information. First, we open a handle to the WLAN system by first calling the WlanOpenHandle function, which we can then use to enumerate WLAN interfaces with the WlanEnumInterfaces function. 1"><meta name=author content="Stephan Bridger"><link rel=canonical href=http://localhost:1313/posts/extracting-windows-wifi-profiles/><link crossorigin=anonymous href=/assets/css/stylesheet.ebad60624e576585fad897ec61f1e484b76ac8b7d5a1d41945b526293757376d.css integrity="sha256-661gYk5XZYX62JfsYfHkhLdqyLfVodQZRbUmKTdXN20=" rel="preload stylesheet" as=style><link rel=icon href=http://localhost:1313/favicon.ico><link rel=icon type=image/png sizes=16x16 href=http://localhost:1313/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=http://localhost:1313/favicon-32x32.png><link rel=apple-touch-icon href=http://localhost:1313/apple-touch-icon.png><link rel=mask-icon href=http://localhost:1313/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=http://localhost:1313/posts/extracting-windows-wifi-profiles/><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=http://localhost:1313/ accesskey=h title="Stephan Bridger (Alt + H)">Stephan Bridger</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
+It turns out, the Windows API offers a nice way to enumerate WLAN information. First, we open a handle to the WLAN system by first calling the WlanOpenHandle function, which we can then use to enumerate WLAN interfaces with the WlanEnumInterfaces function. 1"><meta name=author content="Stephan Bridger"><link rel=canonical href=http://localhost:1313/posts/extracting-windows-wifi-profiles/><link crossorigin=anonymous href=/assets/css/stylesheet.42bb38a3d54fe3b81f57bdbff1058c1148ce9f873642bd714e5589c4a1cd1a7f.css integrity="sha256-Qrs4o9VP47gfV72/8QWMEUjOn4c2Qr1xTlWJxKHNGn8=" rel="preload stylesheet" as=style><link rel=icon href=http://localhost:1313/favicon.ico><link rel=icon type=image/png sizes=16x16 href=http://localhost:1313/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=http://localhost:1313/favicon-32x32.png><link rel=apple-touch-icon href=http://localhost:1313/apple-touch-icon.png><link rel=mask-icon href=http://localhost:1313/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=http://localhost:1313/posts/extracting-windows-wifi-profiles/><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=http://localhost:1313/ accesskey=h title="Stephan Bridger (Alt + H)">Stephan Bridger</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
 <svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=http://localhost:1313/posts/ title=Posts><span>Posts</span></a></li><li><a href=http://localhost:1313/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li><li><a href=http://localhost:1313/tags/ title=Tags><span>Tags</span></a></li><li><a href=http://localhost:1313/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><h1 class="post-title entry-hint-parent">Extracting Windows WiFi Profiles</h1><div class=post-meta><span title='2025-03-19 00:00:00 +0000 UTC'>March 19, 2025</span>&nbsp;·&nbsp;4 min&nbsp;·&nbsp;682 words&nbsp;·&nbsp;Stephan Bridger</div></header><div class=post-content><h2 id=wifiextract>wifiExtract<a hidden class=anchor aria-hidden=true href=#wifiextract>#</a></h2><p>The other day my grandmother forgot her Windows WiFi SSID and password when she wanted to share it with a friend. So I thought if I could just automate the retrieval of her wireless profiles, she would never forget them again in the future.</p><p>It turns out, the Windows API offers a nice way to enumerate WLAN information. First, we open a handle to the WLAN system by first calling the <code>WlanOpenHandle</code> function, which we can then use to enumerate WLAN interfaces with the <code>WlanEnumInterfaces</code> function. <sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-Cpp data-lang=Cpp><span class=line><span class=cl><span class=n>DWORD</span> <span class=nf>WlanEnumInterfaces</span><span class=p>(</span>
 </span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>in</span><span class=p>]</span>  <span class=n>HANDLE</span>                    <span class=n>hClientHandle</span><span class=p>,</span>
 </span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>in</span><span class=p>]</span>  <span class=n>PVOID</span>                     <span class=n>pReserved</span><span class=p>,</span>
 </span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>out</span><span class=p>]</span> <span class=n>PWLAN_INTERFACE_INFO_LIST</span> <span class=o>*</span><span class=n>ppInterfaceList</span>
 </span></span><span class=line><span class=cl><span class=p>);</span>
-</span></span></code></pre></div><p>Once we&rsquo;ve found a wireless network interface, we can iterate through its profiles. WLAN profiles are stored in XML format. We can see an example profile here.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=line><span class=cl><span class=gp>&gt;</span><span class=nb>type</span> %SYSTEMDRIVE%<span class=s2>&#34;\ProgramData\Microsoft\Wlansvc\Profiles\Interfaces\{FA6CC5AF-E3EC-4CDB-A7E9-014E5352F6FA}\{A181B5A9-A72D-445B-948A-DA29AC041866}.xml&#34;</span>
-</span></span><span class=line><span class=cl><span class=go>&lt;?xml version=&#34;1.0&#34;?&gt;
-</span></span></span><span class=line><span class=cl><span class=go>&lt;WLANProfile xmlns=&#34;http://www.microsoft.com/networking/WLAN/profile/v1&#34;&gt;
-</span></span></span><span class=line><span class=cl><span class=go>        &lt;name&gt;networked&lt;/name&gt;
-</span></span></span><span class=line><span class=cl><span class=go>        &lt;SSIDConfig&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                &lt;SSID&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                        &lt;hex&gt;6E6574776F726B6564&lt;/hex&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                        &lt;name&gt;networked&lt;/name&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                &lt;/SSID&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                &lt;nonBroadcast&gt;false&lt;/nonBroadcast&gt;
-</span></span></span><span class=line><span class=cl><span class=go>        &lt;/SSIDConfig&gt;
-</span></span></span><span class=line><span class=cl><span class=go>        &lt;connectionType&gt;ESS&lt;/connectionType&gt;
-</span></span></span><span class=line><span class=cl><span class=go>        &lt;connectionMode&gt;manual&lt;/connectionMode&gt;
-</span></span></span><span class=line><span class=cl><span class=go>        &lt;MSM&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                &lt;security&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                        &lt;authEncryption&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                                &lt;authentication&gt;WPA2PSK&lt;/authentication&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                                &lt;encryption&gt;AES&lt;/encryption&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                                &lt;useOneX&gt;false&lt;/useOneX&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                        &lt;/authEncryption&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                        &lt;sharedKey&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                                &lt;keyType&gt;passPhrase&lt;/keyType&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                                &lt;protected&gt;true&lt;/protected&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                                &lt;keyMaterial&gt;01000000D08C9DDF0115D1118C7A00C04FC297EB01000000C3D1445ECDFED24C989C1BE14BC7ABF5000000000200000000001066000000010000200000007F040AECC06A879362E949BAB5C2810179CABF3300DA399698E4E9D0F8814DD3000000000E80000000020000200000002C48A4A12EABFC325564EC54E086C181A46707218CF19C65151D89430EF5466010000000CC8C4E3C6AACC202F85168DD75B291A5400000004E136AF57200DD275D323E73BBEB2AEABF7AFA8BFEC60B0DA56972203222ABA576E751BF5F5B678CB367A2D6E6272BC691ACCEABDF3959B932EB1C9EE5426065&lt;/keyMaterial&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                        &lt;/sharedKey&gt;
-</span></span></span><span class=line><span class=cl><span class=go>                &lt;/security&gt;
-</span></span></span><span class=line><span class=cl><span class=go>        &lt;/MSM&gt;
-</span></span></span><span class=line><span class=cl><span class=go>&lt;/WLANProfile&gt;
-</span></span></span></code></pre></div><p>For each WLAN profile, we try to locate the <code>&lt;keyMaterial></code> tags, which contain the SSID&rsquo;s passphrase, and get its value.</p><p>But we have to account for the size of the <code>&lt;keyMaterial></code> tag itself when we do our check. So, when we find the tag, we add the size (13) to the beginning marker, as well as subtract the size of the ending marker—ensuring we only extract the passphrase within the key material tags and not any strings or characters from the tags themselves.</p><p>Altogether, for each WLAN profile we find, we use <code>WlanGetProfile</code> to acquire the SSID, aka the profileName, and its related passphrase.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-Cpp data-lang=Cpp><span class=line><span class=cl><span class=n>DWORD</span> <span class=nf>WlanGetProfile</span><span class=p>(</span>
+</span></span></code></pre></div><p>Once we&rsquo;ve found a wireless network interface, we can iterate through its profiles. WLAN profiles are stored in XML format. We can see an example profile here.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>&gt;type %SYSTEMDRIVE%&#34;\ProgramData\Microsoft\Wlansvc\Profiles\Interfaces\{FA6CC5AF-E3EC-4CDB-A7E9-014E5352F6FA}\{A181B5A9-A72D-445B-948A-DA29AC041866}.xml&#34;
+</span></span><span class=line><span class=cl>&lt;?xml version=&#34;1.0&#34;?&gt;
+</span></span><span class=line><span class=cl>&lt;WLANProfile xmlns=&#34;http://www.microsoft.com/networking/WLAN/profile/v1&#34;&gt;
+</span></span><span class=line><span class=cl>        &lt;name&gt;networked&lt;/name&gt;
+</span></span><span class=line><span class=cl>        &lt;SSIDConfig&gt;
+</span></span><span class=line><span class=cl>                &lt;SSID&gt;
+</span></span><span class=line><span class=cl>                        &lt;hex&gt;6E6574776F726B6564&lt;/hex&gt;
+</span></span><span class=line><span class=cl>                        &lt;name&gt;networked&lt;/name&gt;
+</span></span><span class=line><span class=cl>                &lt;/SSID&gt;
+</span></span><span class=line><span class=cl>                &lt;nonBroadcast&gt;false&lt;/nonBroadcast&gt;
+</span></span><span class=line><span class=cl>        &lt;/SSIDConfig&gt;
+</span></span><span class=line><span class=cl>        &lt;connectionType&gt;ESS&lt;/connectionType&gt;
+</span></span><span class=line><span class=cl>        &lt;connectionMode&gt;manual&lt;/connectionMode&gt;
+</span></span><span class=line><span class=cl>        &lt;MSM&gt;
+</span></span><span class=line><span class=cl>                &lt;security&gt;
+</span></span><span class=line><span class=cl>                        &lt;authEncryption&gt;
+</span></span><span class=line><span class=cl>                                &lt;authentication&gt;WPA2PSK&lt;/authentication&gt;
+</span></span><span class=line><span class=cl>                                &lt;encryption&gt;AES&lt;/encryption&gt;
+</span></span><span class=line><span class=cl>                                &lt;useOneX&gt;false&lt;/useOneX&gt;
+</span></span><span class=line><span class=cl>                        &lt;/authEncryption&gt;
+</span></span><span class=line><span class=cl>                        &lt;sharedKey&gt;
+</span></span><span class=line><span class=cl>                                &lt;keyType&gt;passPhrase&lt;/keyType&gt;
+</span></span><span class=line><span class=cl>                                &lt;protected&gt;true&lt;/protected&gt;
+</span></span><span class=line><span class=cl>                                &lt;keyMaterial&gt;01000000D08C9DDF0115D1118C7A00C04FC297EB01000000C3D1445ECDFED24C989C1BE14BC7ABF5000000000200000000001066000000010000200000007F040AECC06A879362E949BAB5C2810179CABF3300DA399698E4E9D0F8814DD3000000000E80000000020000200000002C48A4A12EABFC325564EC54E086C181A46707218CF19C65151D89430EF5466010000000CC8C4E3C6AACC202F85168DD75B291A5400000004E136AF57200DD275D323E73BBEB2AEABF7AFA8BFEC60B0DA56972203222ABA576E751BF5F5B678CB367A2D6E6272BC691ACCEABDF3959B932EB1C9EE5426065&lt;/keyMaterial&gt;
+</span></span><span class=line><span class=cl>                        &lt;/sharedKey&gt;
+</span></span><span class=line><span class=cl>                &lt;/security&gt;
+</span></span><span class=line><span class=cl>        &lt;/MSM&gt;
+</span></span><span class=line><span class=cl>&lt;/WLANProfile&gt;
+</span></span></code></pre></div><p>For each WLAN profile, we try to locate the <code>&lt;keyMaterial></code> tags, which contain the SSID&rsquo;s passphrase, and get its value.</p><p>But we have to account for the size of the <code>&lt;keyMaterial></code> tag itself when we do our check. So, when we find the tag, we add the size (13) to the beginning marker, as well as subtract the size of the ending marker—ensuring we only extract the passphrase within the key material tags and not any strings or characters from the tags themselves.</p><p>Altogether, for each WLAN profile we find, we use <code>WlanGetProfile</code> to acquire the SSID, aka the profileName, and its related passphrase.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-Cpp data-lang=Cpp><span class=line><span class=cl><span class=n>DWORD</span> <span class=nf>WlanGetProfile</span><span class=p>(</span>
 </span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>in</span><span class=p>]</span>                <span class=n>HANDLE</span>     <span class=n>hClientHandle</span><span class=p>,</span>
 </span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>in</span><span class=p>]</span>                <span class=k>const</span> <span class=n>GUID</span> <span class=o>*</span><span class=n>pInterfaceGuid</span><span class=p>,</span>
 </span></span><span class=line><span class=cl>  <span class=p>[</span><span class=n>in</span><span class=p>]</span>                <span class=n>LPCWSTR</span>    <span class=n>strProfileName</span><span class=p>,</span>
@@ -86,48 +86,48 @@ It turns out, the Windows API offers a nice way to enumerate WLAN information. F
 </span></span><span class=line><span class=cl>            <span class=p>}</span>
 </span></span><span class=line><span class=cl>
 </span></span><span class=line><span class=cl> <span class=c1>// snipped
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=line><span class=cl><span class=gp>&gt;</span>msbuild wifiExtract<span class=se>\w</span>ifiExtract<span class=se>\w</span>ifiExtract.vcxproj
-</span></span><span class=line><span class=cl><span class=go>MSBuild version 17.13.19+0d9f5a35a for .NET Framework
-</span></span></span><span class=line><span class=cl><span class=go>Build started 3/19/2025 11:49:09 PM.
-</span></span></span><span class=line><span class=cl><span class=go></span><span class=err>
-</span></span></span><span class=line><span class=cl><span class=err></span><span class=go>Project &#34;C:\Users\augur\source\repos\wifiExtract\wifiExtract\wifiExtract.vcxproj&#34; on node 1 (default targets)
-</span></span></span><span class=line><span class=cl><span class=go>.
-</span></span></span><span class=line><span class=cl><span class=go>PrepareForBuild:
-</span></span></span><span class=line><span class=cl><span class=go>  Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See
-</span></span></span><span class=line><span class=cl><span class=go>  https://aka.ms/cpp/structured-output for more details.
-</span></span></span><span class=line><span class=cl><span class=go>InitializeBuildStatus:
-</span></span></span><span class=line><span class=cl><span class=go>  Creating &#34;wifiExtract\Debug\wifiExtract.tlog\unsuccessfulbuild&#34; because &#34;AlwaysCreate&#34; was specified.
-</span></span></span><span class=line><span class=cl><span class=go>  Touching &#34;wifiExtract\Debug\wifiExtract.tlog\unsuccessfulbuild&#34;.
-</span></span></span><span class=line><span class=cl><span class=go>ClCompile:
-</span></span></span><span class=line><span class=cl><span class=go>  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX86\x86\CL.exe /c
-</span></span></span><span class=line><span class=cl><span class=go>   /ZI /JMC /nologo /W3 /WX- /diagnostics:column /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D
-</span></span></span><span class=line><span class=cl><span class=go>  UNICODE /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /permissive- /Fo&#34;wifiExtr
-</span></span></span><span class=line><span class=cl><span class=go>  act\Debug\\&#34; /Fd&#34;wifiExtract\Debug\vc143.pdb&#34; /external:W3 /Gd /TP /analyze- /FC /errorReport:queue wifiExt
-</span></span></span><span class=line><span class=cl><span class=go>  ract.cpp
-</span></span></span><span class=line><span class=cl><span class=go>  wifiExtract.cpp
-</span></span></span><span class=line><span class=cl><span class=go>Link:
-</span></span></span><span class=line><span class=cl><span class=go>  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX86\x86\link.exe
-</span></span></span><span class=line><span class=cl><span class=go>  /ERRORREPORT:QUEUE /OUT:&#34;C:\Users\augur\source\repos\wifiExtract\wifiExtract\Debug\wifiExtract.exe&#34; /INCREM
-</span></span></span><span class=line><span class=cl><span class=go>  ENTAL /ILK:&#34;wifiExtract\Debug\wifiExtract.ilk&#34; /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdl
-</span></span></span><span class=line><span class=cl><span class=go>  g32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFES
-</span></span></span><span class=line><span class=cl><span class=go>  TUAC:&#34;level=&#39;asInvoker&#39; uiAccess=&#39;false&#39;&#34; /manifest:embed /DEBUG /PDB:&#34;C:\Users\augur\source\repos\wifiExtr
-</span></span></span><span class=line><span class=cl><span class=go>  act\wifiExtract\Debug\wifiExtract.pdb&#34; /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:&#34;C:\Users
-</span></span></span><span class=line><span class=cl><span class=go>  \augur\source\repos\wifiExtract\wifiExtract\Debug\wifiExtract.lib&#34; /MACHINE:X86 wifiExtract\Debug\wifiExtra
-</span></span></span><span class=line><span class=cl><span class=go>  ct.obj
-</span></span></span><span class=line><span class=cl><span class=go>  wifiExtract.vcxproj -&gt; C:\Users\augur\source\repos\wifiExtract\wifiExtract\Debug\wifiExtract.exe
-</span></span></span><span class=line><span class=cl><span class=go>FinalizeBuildStatus:
-</span></span></span><span class=line><span class=cl><span class=go>  Deleting file &#34;wifiExtract\Debug\wifiExtract.tlog\unsuccessfulbuild&#34;.
-</span></span></span><span class=line><span class=cl><span class=go>  Touching &#34;wifiExtract\Debug\wifiExtract.tlog\wifiExtract.lastbuildstate&#34;.
-</span></span></span><span class=line><span class=cl><span class=go>Done Building Project &#34;C:\Users\augur\source\repos\wifiExtract\wifiExtract\wifiExtract.vcxproj&#34; (default targ
-</span></span></span><span class=line><span class=cl><span class=go>ets).
-</span></span></span><span class=line><span class=cl><span class=go></span><span class=err>
-</span></span></span><span class=line><span class=cl><span class=err>
-</span></span></span><span class=line><span class=cl><span class=err></span><span class=go>Build succeeded.
-</span></span></span><span class=line><span class=cl><span class=go>    0 Warning(s)
-</span></span></span><span class=line><span class=cl><span class=go>    0 Error(s)
-</span></span></span><span class=line><span class=cl><span class=go></span><span class=err>
-</span></span></span><span class=line><span class=cl><span class=err></span><span class=go>Time Elapsed 00:00:06.61
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=line><span class=cl><span class=gp>&gt;</span>wifiExtract.exe
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>&gt;msbuild wifiExtract\wifiExtract\wifiExtract.vcxproj
+</span></span><span class=line><span class=cl>MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+</span></span><span class=line><span class=cl>Build started 3/19/2025 11:49:09 PM.
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Project &#34;C:\Users\augur\source\repos\wifiExtract\wifiExtract\wifiExtract.vcxproj&#34; on node 1 (default targets)
+</span></span><span class=line><span class=cl>.
+</span></span><span class=line><span class=cl>PrepareForBuild:
+</span></span><span class=line><span class=cl>  Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See
+</span></span><span class=line><span class=cl>  https://aka.ms/cpp/structured-output for more details.
+</span></span><span class=line><span class=cl>InitializeBuildStatus:
+</span></span><span class=line><span class=cl>  Creating &#34;wifiExtract\Debug\wifiExtract.tlog\unsuccessfulbuild&#34; because &#34;AlwaysCreate&#34; was specified.
+</span></span><span class=line><span class=cl>  Touching &#34;wifiExtract\Debug\wifiExtract.tlog\unsuccessfulbuild&#34;.
+</span></span><span class=line><span class=cl>ClCompile:
+</span></span><span class=line><span class=cl>  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX86\x86\CL.exe /c
+</span></span><span class=line><span class=cl>   /ZI /JMC /nologo /W3 /WX- /diagnostics:column /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D
+</span></span><span class=line><span class=cl>  UNICODE /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /permissive- /Fo&#34;wifiExtr
+</span></span><span class=line><span class=cl>  act\Debug\\&#34; /Fd&#34;wifiExtract\Debug\vc143.pdb&#34; /external:W3 /Gd /TP /analyze- /FC /errorReport:queue wifiExt
+</span></span><span class=line><span class=cl>  ract.cpp
+</span></span><span class=line><span class=cl>  wifiExtract.cpp
+</span></span><span class=line><span class=cl>Link:
+</span></span><span class=line><span class=cl>  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX86\x86\link.exe
+</span></span><span class=line><span class=cl>  /ERRORREPORT:QUEUE /OUT:&#34;C:\Users\augur\source\repos\wifiExtract\wifiExtract\Debug\wifiExtract.exe&#34; /INCREM
+</span></span><span class=line><span class=cl>  ENTAL /ILK:&#34;wifiExtract\Debug\wifiExtract.ilk&#34; /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdl
+</span></span><span class=line><span class=cl>  g32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFES
+</span></span><span class=line><span class=cl>  TUAC:&#34;level=&#39;asInvoker&#39; uiAccess=&#39;false&#39;&#34; /manifest:embed /DEBUG /PDB:&#34;C:\Users\augur\source\repos\wifiExtr
+</span></span><span class=line><span class=cl>  act\wifiExtract\Debug\wifiExtract.pdb&#34; /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:&#34;C:\Users
+</span></span><span class=line><span class=cl>  \augur\source\repos\wifiExtract\wifiExtract\Debug\wifiExtract.lib&#34; /MACHINE:X86 wifiExtract\Debug\wifiExtra
+</span></span><span class=line><span class=cl>  ct.obj
+</span></span><span class=line><span class=cl>  wifiExtract.vcxproj -&gt; C:\Users\augur\source\repos\wifiExtract\wifiExtract\Debug\wifiExtract.exe
+</span></span><span class=line><span class=cl>FinalizeBuildStatus:
+</span></span><span class=line><span class=cl>  Deleting file &#34;wifiExtract\Debug\wifiExtract.tlog\unsuccessfulbuild&#34;.
+</span></span><span class=line><span class=cl>  Touching &#34;wifiExtract\Debug\wifiExtract.tlog\wifiExtract.lastbuildstate&#34;.
+</span></span><span class=line><span class=cl>Done Building Project &#34;C:\Users\augur\source\repos\wifiExtract\wifiExtract\wifiExtract.vcxproj&#34; (default targ
+</span></span><span class=line><span class=cl>ets).
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Build succeeded.
+</span></span><span class=line><span class=cl>    0 Warning(s)
+</span></span><span class=line><span class=cl>    0 Error(s)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Time Elapsed 00:00:06.61
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-console data-lang=console><span class=line><span class=cl><span class=gp>&gt;</span>wifiExtract.exe
 </span></span><span class=line><span class=cl><span class=go>[+] Found Wifi Profile:
 </span></span></span><span class=line><span class=cl><span class=go>[+] SSID: openNet
 </span></span></span><span class=line><span class=cl><span class=go>[+] No key material found

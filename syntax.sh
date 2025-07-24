@@ -1,101 +1,74 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Default values
+# Defaults
 light_theme=""
 dark_theme=""
 destination_path="assets/css/extended/syntax.css"
 
-# Help message
+# Usage help
 usage() {
   cat <<EOF
 Usage: $0 [options] [--] [light-theme] [dark-theme]
 
 Options:
-  -h, --help                Show this help message and exit
-  --light-theme=LIGHT_THEME Set the light theme
-  --dark-theme=DARK_THEME   Set the dark theme
-  --destination-path=PATH   Set the destination path for the output file
+  -h, --help                  Show this help message and exit
+  --light-theme=THEME        Set the light theme (e.g. abap)
+  --dark-theme=THEME         Set the dark theme (e.g. monokai)
+  --destination-path=PATH    Set output file path (default: assets/css/extended/syntax.css)
 
 Positional arguments:
-  light-theme              Light theme (alternative to --light-theme)
-  dark-theme               Dark theme (alternative to --dark-theme)
+  light-theme                Light theme name (if not using --light-theme)
+  dark-theme                 Dark theme name (if not using --dark-theme)
+
+Examples:
+  $0 abap monokai
+  $0 --light-theme=github --dark-theme=dracula
 EOF
 }
 
-positional_arg_counter=0
-
-# Parse options and arguments
+# Parse options
 while [[ $# -gt 0 ]]; do
-  case $1 in
+  case "$1" in
     -h|--help)
-      usage
-      exit 0
-      ;;
+      usage; exit 0 ;;
     --light-theme=*)
-      light_theme="${1#*=}"
-      positional_arg_counter=$((positional_arg_counter + 1))
-      shift
-      ;;
+      light_theme="${1#*=}"; shift ;;
     --dark-theme=*)
-      dark_theme="${1#*=}"
-      positional_arg_counter=$((positional_arg_counter + 1))
-      shift
-      ;;
+      dark_theme="${1#*=}"; shift ;;
     --destination-path=*)
-      destination_path="${1#*=}"
-      shift
-      ;;
+      destination_path="${1#*=}"; shift ;;
     *)
-      if [[ $positional_arg_counter -eq 0 ]]; then
+      if [[ -z "$light_theme" ]]; then
         light_theme="$1"
-      elif [[ $positional_arg_counter -eq 1 ]]; then
+      elif [[ -z "$dark_theme" ]]; then
         dark_theme="$1"
       else
-        echo "Error: Too many arguments" >&2
-        usage
-        exit 1
+        echo "Error: Too many positional arguments"; usage; exit 1
       fi
-      positional_arg_counter=$((positional_arg_counter + 1))
-      shift
-      ;;
+      shift ;;
   esac
 done
 
-if [[ -z "$light_theme" ]] || [[ -z "$dark_theme" ]]; then
-  echo "Error: Missing arguments" >&2
+# Validation
+if [[ -z "$light_theme" || -z "$dark_theme" ]]; then
+  echo "Error: Light and dark themes are required."
   usage
   exit 1
 fi
 
-# Create directory structure if needed
+# Create target directory if needed
 mkdir -p "$(dirname "$destination_path")"
 
-# Debug output
-echo "Generating light theme: $light_theme"
-echo "Output file: $destination_path"
-
-# Generate light theme
-hugo gen chromastyles --style="$light_theme" > "$destination_path"
-
-# Verify light theme generation
-if [ ! -f "$destination_path" ]; then
-  echo "Error: Failed to create light theme file!"
-  exit 1
-fi
-
-# Generate dark theme
-echo "Appending dark theme: $dark_theme"
+# Generate syntax styles
 {
-    echo "@media (prefers-color-scheme: dark) {"
-    hugo gen chromastyles --style="$dark_theme" | sed -r 's/(^\/\*[^*]*\*\/)?(.+)/\1 .dark\2/'
-    echo "}"
-} >> "$destination_path"
+  echo "/* Light theme: $light_theme */"
+  hugo gen chromastyles --style="$light_theme" | sed 's/^/body:not(.dark) /'
 
-# Final verification
-if [ $? -eq 0 ]; then
-  echo "Successfully generated syntax.css with both themes!"
-else
-  echo "Error: Failed to append dark theme!"
-  exit 1
-fi
+  echo ""
+  echo "/* Dark theme: $dark_theme */"
+  hugo gen chromastyles --style="$dark_theme" | sed 's/^/body.dark /'
+} > "$destination_path"
+
+echo "✅ Syntax highlighting CSS written to: $destination_path"
+ 

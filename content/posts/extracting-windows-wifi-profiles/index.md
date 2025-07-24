@@ -23,7 +23,7 @@ DWORD WlanEnumInterfaces(
 
 Once we've found a wireless network interface, we can iterate through its profiles. WLAN profiles are stored in XML format. We can see an example profile here.
 
-```console
+```text
 >type %SYSTEMDRIVE%"\ProgramData\Microsoft\Wlansvc\Profiles\Interfaces\{FA6CC5AF-E3EC-4CDB-A7E9-014E5352F6FA}\{A181B5A9-A72D-445B-948A-DA29AC041866}.xml"
 <?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
@@ -121,7 +121,7 @@ for (DWORD i = 0; i < plist->dwNumberOfItems; ++i) {
  ```
 
 
-```console
+```text
 >msbuild wifiExtract\wifiExtract\wifiExtract.vcxproj
 MSBuild version 17.13.19+0d9f5a35a for .NET Framework
 Build started 3/19/2025 11:49:09 PM.
