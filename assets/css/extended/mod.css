@@ -1,0 +1,194 @@
+:root {
+    --gap: 24px;
+    --content-gap: 20px;
+    --nav-width: 1024px;
+    --main-width: 720px;
+    --header-height: 60px;
+    --footer-height: 60px;
+    --radius: 8px;
+    --theme: rgb(255, 255, 255);
+    --entry: rgb(255, 255, 255);
+    --primary: rgb(30, 30, 30);
+    --secondary: rgb(108, 108, 108);
+    --tertiary: rgb(214, 214, 214);
+    --content: rgb(31, 31, 31);
+    /*--code-block-bg: rgb(28, 29, 33);*/
+    --code-block-bg: #f2f2f2;
+    --code-bg: rgb(245, 245, 245);
+    --border: rgb(238, 238, 238);
+}
+
+.dark {
+    --theme: rgb(29, 30, 32);
+    --entry: rgb(46, 46, 51);
+    --primary: rgb(218, 218, 219);
+    --secondary: rgb(155, 156, 157);
+    --tertiary: rgb(65, 66, 68);
+    --content: rgb(196, 196, 197);
+    --code-block-bg: rgb(46, 46, 51);
+    --code-bg: rgb(55, 56, 62);
+    --border: rgb(51, 51, 51);
+}
+
+
+.list {
+    background: var(--code-bg);
+}
+
+.dark.list {
+    background: var(--theme);
+}
+
+
+
+/* typography */
+
+html, body {
+ overflow-x: hidden; 
+  overflow-y: auto;
+  height: 100%;
+}
+
+
+/* Always show scrollbar space to prevent layout shifts */
+body {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin; 
+  scrollbar-color: #888 #f1f1f1;
+}
+
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+  
+}
+
+
+.dark::-webkit-scrollbar-track {
+  background-color: #1e1e1e;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background-color: #ccc; 
+  border-radius: 4px;
+}
+
+
+.footnotes::before {
+  content: "References";
+  display: block;
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 2em;
+  color: inherit;
+}
+
+.footnotes li,
+.footnotes li a {
+  font-size: 14px;
+  hyphens: auto;
+  white-space: pre-wrap;
+
+  
+}
+
+
+.footnotes li {
+    padding: 5px 5px 5px 5px;
+}
+
+
+
+
+
+
+.post-content blockquote {
+    border-inline-start: 5px solid #fa5e55;
+}
+
+.dark .post-content blockquote {
+    border-inline-start: 5px solid #84d171;
+}
+
+
+/* exclude code blocks from being justified */
+
+pre, code {
+    text-align: left;
+}
+
+
+
+
+
+/* touch up superscript */
+
+sup a {
+    font-size: 0.8em; 
+    vertical-align: super; 
+    margin-left: 0.2em; 
+    margin-right: 0.2em; 
+    color: #fa5e55
+}
+
+
+
+.post-content table th, .post-content table:not(.highlighttable,.highlight table,.gist .highlight) td {
+    font-size: 17px;
+
+}
+
+/* dark mode superscript a href */
+
+.dark sup a {
+    color: #84d171; 
+}
+
+
+
+/* touch up the highlighter text color */
+.dark .post-content .cl {
+    color: #fff;
+}
+
+.post-content .cl {
+    color:#000;
+}
+
+
+/* dark theme - inline <code> */
+
+.dark .post-content p code {
+    color: #84d171;
+}
+
+ /* light theme - inline <code> */
+.post-content p code {
+    color: #fa5e55;
+}
+
+.post-content a {
+    color: #fa5e55;
+}
+
+
+.dark .post-content p a {
+    color: #84d171;
+}
+
+
+
+
+
