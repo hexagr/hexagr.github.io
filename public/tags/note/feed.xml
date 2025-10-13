@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Note on Stephan Bridger</title>
+    <link>https://hexagram.foo/tags/note/</link>
+    <description>Recent content in Note on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 04 Sep 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/tags/note/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A Sideblog on Blogspot</title>
+      <link>https://hexagram.foo/posts/a-sideblog-on-blogspot/</link>
+      <pubDate>Mon, 04 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/a-sideblog-on-blogspot/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve been somewhat mute here lately and haven&amp;rsquo;t updated my GitHub Pages in a while. However, I&amp;rsquo;ve been actively engaged in research and taking notes on a new &lt;a href=&#34;https://hexagr.blogspot.com&#34;&gt;sideblog on Blogspot&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;So, I&amp;rsquo;ve been writing a little Rust, Python, and C# code, &lt;a href=&#34;https://hexagr.blogspot.com/2023/08/portable-executable-format-and.html&#34;&gt;exploring&lt;/a&gt; &lt;a href=&#34;https://hexagr.blogspot.com/2023/08/windows-process-initialization.html&#34;&gt;operating system internals&lt;/a&gt;. And &lt;a href=&#34;https://hexagram.foo/posts/using-c-sharp-to-enumerate-windows-processes/&#34;&gt;utilizing aspects of .NET to do stuff on Windows&lt;/a&gt;. And occasionally, I&amp;rsquo;ve been &lt;a href=&#34;https://hexagr.blogspot.com/2023/01/mm-malware-analysis.html&#34;&gt;analyzing malware&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
