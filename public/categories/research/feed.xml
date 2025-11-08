@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Research on Stephan Bridger</title>
+    <link>https://hexagram.foo/categories/research/</link>
+    <description>Recent content in Research on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 23 Feb 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/categories/research/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Infecting Linux ELF Files</title>
+      <link>https://hexagram.foo/posts/infecting-linux-elf-files/</link>
+      <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/infecting-linux-elf-files/</guid>
+      <description>&lt;h2 id=&#34;elfland&#34;&gt;Elfland&lt;/h2&gt;
+&lt;p&gt;Lately I&amp;rsquo;ve been thinking about Linux internals and malware. In this blog post, we&amp;rsquo;re going to hark about the ELFs. Just as Windows has its own &lt;a href=&#34;https://www.stephan.onl/2023/08/portable-executable-format-and.html&#34;&gt;executable format&lt;/a&gt;, so too does Linux.&lt;/p&gt;
+&lt;p&gt;If we look at the source code&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; to the Executable and Linkable Format specification in &lt;code&gt;elf.h&lt;/code&gt;, we can see the definition of the ELF header and some of its core machinery to get an idea of how it works.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

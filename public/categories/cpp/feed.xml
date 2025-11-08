@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Cpp on Stephan Bridger</title>
+    <link>https://hexagram.foo/categories/cpp/</link>
+    <description>Recent content in Cpp on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 11 May 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/categories/cpp/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Detecting WoW64 Processes</title>
+      <link>https://hexagram.foo/posts/detecting-wow64-processes/</link>
+      <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/detecting-wow64-processes/</guid>
+      <description>&lt;p&gt;WoW64 (Windows 32-bit on Windows 64-bit) is a subsystem within Microsoft Windows that lets Windows run 32-bit programs on 64-bit hardware.&lt;/p&gt;
+&lt;p&gt;One way to glean what processes are currently running in WoW64 mode is by querying &lt;code&gt;NtQuerySystemInformation&lt;/code&gt; and checking whether &lt;code&gt;IsWow64Process&lt;/code&gt; returns true or not.&lt;/p&gt;
+&lt;p&gt;This returns a pointer to a value that is set to TRUE if the process is running under WOW64 on an Intel64, x64, or ARM64 processor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Extracting Windows WiFi Profiles</title>
+      <link>https://hexagram.foo/posts/extracting-windows-wifi-profiles/</link>
+      <pubDate>Wed, 19 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/extracting-windows-wifi-profiles/</guid>
+      <description>&lt;h2 id=&#34;wifiextract&#34;&gt;wifiExtract&lt;/h2&gt;
+&lt;p&gt;The other day my grandmother forgot her Windows WiFi SSID and password when she wanted to share it with a friend. So I thought if I could just automate the retrieval of her wireless profiles, she would never forget them again in the future.&lt;/p&gt;
+&lt;p&gt;It turns out, the Windows API offers a nice way to enumerate WLAN information. First, we open a handle to the WLAN system by first calling the &lt;code&gt;WlanOpenHandle&lt;/code&gt; function, which we can then use to enumerate WLAN interfaces with the &lt;code&gt;WlanEnumInterfaces&lt;/code&gt; function. &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

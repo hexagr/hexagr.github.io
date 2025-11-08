@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Programming on Stephan Bridger</title>
+    <link>https://hexagram.foo/categories/programming/</link>
+    <description>Recent content in Programming on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 11 May 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/categories/programming/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Detecting WoW64 Processes</title>
+      <link>https://hexagram.foo/posts/detecting-wow64-processes/</link>
+      <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/detecting-wow64-processes/</guid>
+      <description>&lt;p&gt;WoW64 (Windows 32-bit on Windows 64-bit) is a subsystem within Microsoft Windows that lets Windows run 32-bit programs on 64-bit hardware.&lt;/p&gt;
+&lt;p&gt;One way to glean what processes are currently running in WoW64 mode is by querying &lt;code&gt;NtQuerySystemInformation&lt;/code&gt; and checking whether &lt;code&gt;IsWow64Process&lt;/code&gt; returns true or not.&lt;/p&gt;
+&lt;p&gt;This returns a pointer to a value that is set to TRUE if the process is running under WOW64 on an Intel64, x64, or ARM64 processor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Bypassing Windows Defender</title>
+      <link>https://hexagram.foo/posts/bypassing-windows-defender/</link>
+      <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/bypassing-windows-defender/</guid>
+      <description>&lt;p&gt;Lately I&amp;rsquo;ve been poking around at Windows internals and writing low level code. This morning I thought I&amp;rsquo;d try to bypass Windows Defender &lt;em&gt;and&lt;/em&gt; get a low score on Virus Total.&lt;/p&gt;
+&lt;p&gt;One trick I’ve been playing with is writing shellcode to the Windows registry to keep things “fileless.” It’s not super fancy, but it’s kind of neat. I combined that with indirect syscalls and some cryptographic routines to get Windows Defender to chill out.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
