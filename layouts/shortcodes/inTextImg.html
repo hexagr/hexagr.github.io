@@ -1,0 +1,14 @@
+{{- $Img := (.Get "url") }}
+{{- $height := (.Get "height") }}
+{{- $width := (.Get "width") }}  <!-- ADD THIS LINE -->
+{{- $alt := (.Get "alt") }}
+{{- $class := (.Get "class") | default "in-text" }} <!-- Allow overriding default class -->
+
+<img 
+    class="{{ $class }}" 
+    src="{{$Img}}" 
+    alt="{{$alt}}" 
+    height="{{ $height }}" 
+    width="{{ $width }}" 
+    style="max-width: 100%; height: auto;" 
+>

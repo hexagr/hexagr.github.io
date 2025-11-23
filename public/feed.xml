@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Stephan Bridger</title>
+    <link>https://hexagram.foo/</link>
+    <description>Recent content on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 11 May 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Detecting WoW64 Processes</title>
+      <link>https://hexagram.foo/posts/detecting-wow64-processes/</link>
+      <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/detecting-wow64-processes/</guid>
+      <description>&lt;p&gt;WoW64 (Windows 32-bit on Windows 64-bit) is a subsystem within Microsoft Windows that lets Windows run 32-bit programs on 64-bit hardware.&lt;/p&gt;
+&lt;p&gt;One way to glean what processes are currently running in WoW64 mode is by querying &lt;code&gt;NtQuerySystemInformation&lt;/code&gt; and checking whether &lt;code&gt;IsWow64Process&lt;/code&gt; returns true or not.&lt;/p&gt;
+&lt;p&gt;This returns a pointer to a value that is set to TRUE if the process is running under WOW64 on an Intel64, x64, or ARM64 processor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Bypassing Windows Defender</title>
+      <link>https://hexagram.foo/posts/bypassing-windows-defender/</link>
+      <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/bypassing-windows-defender/</guid>
+      <description>&lt;p&gt;Lately I&amp;rsquo;ve been poking around at Windows internals and writing low level code. This morning I thought I&amp;rsquo;d try to bypass Windows Defender &lt;em&gt;and&lt;/em&gt; get a low score on Virus Total.&lt;/p&gt;
+&lt;p&gt;One trick I’ve been playing with is writing shellcode to the Windows registry to keep things “fileless.” It’s not super fancy, but it’s kind of neat. I combined that with indirect syscalls and some cryptographic routines to get Windows Defender to chill out.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Extracting Windows WiFi Profiles</title>
+      <link>https://hexagram.foo/posts/extracting-windows-wifi-profiles/</link>
+      <pubDate>Wed, 19 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/extracting-windows-wifi-profiles/</guid>
+      <description>&lt;h2 id=&#34;wifiextract&#34;&gt;wifiExtract&lt;/h2&gt;
+&lt;p&gt;The other day my grandmother forgot her Windows WiFi SSID and password when she wanted to share it with a friend. So I thought if I could just automate the retrieval of her wireless profiles, she would never forget them again in the future.&lt;/p&gt;
+&lt;p&gt;It turns out, the Windows API offers a nice way to enumerate WLAN information. First, we open a handle to the WLAN system by first calling the &lt;code&gt;WlanOpenHandle&lt;/code&gt; function, which we can then use to enumerate WLAN interfaces with the &lt;code&gt;WlanEnumInterfaces&lt;/code&gt; function. &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Infecting Linux ELF Files</title>
+      <link>https://hexagram.foo/posts/infecting-linux-elf-files/</link>
+      <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/infecting-linux-elf-files/</guid>
+      <description>&lt;h2 id=&#34;elfland&#34;&gt;Elfland&lt;/h2&gt;
+&lt;p&gt;Lately I&amp;rsquo;ve been thinking about Linux internals and malware. In this blog post, we&amp;rsquo;re going to hark about the ELFs. Just as Windows has its own &lt;a href=&#34;https://www.stephan.onl/2023/08/portable-executable-format-and.html&#34;&gt;executable format&lt;/a&gt;, so too does Linux.&lt;/p&gt;
+&lt;p&gt;If we look at the source code&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; to the Executable and Linkable Format specification in &lt;code&gt;elf.h&lt;/code&gt;, we can see the definition of the ELF header and some of its core machinery to get an idea of how it works.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A Sideblog on Blogspot</title>
+      <link>https://hexagram.foo/posts/a-sideblog-on-blogspot/</link>
+      <pubDate>Mon, 04 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/a-sideblog-on-blogspot/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve been somewhat mute here lately and haven&amp;rsquo;t updated my GitHub Pages in a while. However, I&amp;rsquo;ve been actively engaged in research and taking notes on a new &lt;a href=&#34;https://hexagr.blogspot.com&#34;&gt;sideblog on Blogspot&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;So, I&amp;rsquo;ve been writing a little Rust, Python, and C# code, &lt;a href=&#34;https://hexagr.blogspot.com/2023/08/portable-executable-format-and.html&#34;&gt;exploring&lt;/a&gt; &lt;a href=&#34;https://hexagr.blogspot.com/2023/08/windows-process-initialization.html&#34;&gt;operating system internals&lt;/a&gt;. And &lt;a href=&#34;https://hexagram.foo/posts/using-c-sharp-to-enumerate-windows-processes/&#34;&gt;utilizing aspects of .NET to do stuff on Windows&lt;/a&gt;. And occasionally, I&amp;rsquo;ve been &lt;a href=&#34;https://hexagr.blogspot.com/2023/01/mm-malware-analysis.html&#34;&gt;analyzing malware&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Using C Sharp to Enumerate Windows Processes</title>
+      <link>https://hexagram.foo/posts/using-c-sharp-to-enumerate-windows-processes/</link>
+      <pubDate>Sun, 03 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/using-c-sharp-to-enumerate-windows-processes/</guid>
+      <description>&lt;p&gt;In previous posts, I covered how to observe process information &lt;a href=&#34;https://hexagr.blogspot.com/2023/08/windows-process-initialization.html&#34;&gt;in Windbg by starting a debugging session and dumping the Process Environment Block&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;And how we can view the EPROCESS structure, including a doubly linked-list of &lt;a href=&#34;https://hexagram.foo/posts/finding-active-processes-with-windbg/&#34;&gt;active processes via ActiveProcessLinks&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;But in this post, we&amp;rsquo;ll discuss yet another way of gleaning information about processes in Windows, this time from another structure within the Windows ecosystem: the &lt;code&gt;SYSTEM_PROCESS_INFORMATION&lt;/code&gt; structure.&lt;/p&gt;
+&lt;h2 id=&#34;system_process_information-structure&#34;&gt;SYSTEM_PROCESS_INFORMATION Structure&lt;/h2&gt;
+&lt;p&gt;Microsoft tells us in their documentation that this structure holds various entries which hold system and process information.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Finding Active Processes with Windbg</title>
+      <link>https://hexagram.foo/posts/finding-active-processes-with-windbg/</link>
+      <pubDate>Sat, 02 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/finding-active-processes-with-windbg/</guid>
+      <description>&lt;p&gt;In the Windows kernel, each process is assigned an EPROCESS structure, which is a kernel object that represents a program or process. And a Process Environment Block (PEB) is just one of many structures pointed to by the EPROCESS structure.  A snippet from &lt;code&gt;_EPROCESS&lt;/code&gt; as documented on Vergilius Project:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-C&#34; data-lang=&#34;C&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;volatile&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ULONGLONG&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;OwnerProcessId&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PEB&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Peb&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_MM_SESSION_SPACE&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Session&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;VOID&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Sparel&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In user space however, we cannot directly reference all of the EPROCESS structures and their data. At most, we can do something like &lt;code&gt;dt nt!_EPROCESS&lt;/code&gt; in windbg and get a peek at the layout. We&amp;rsquo;ll have to enable kernel debugging to more closely examine things. But here&amp;rsquo;s what we can see in user mode. The EPROCESS structure is large. The entire output from windbg is as follows:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Inference: Side-Channel Attacks</title>
+      <link>https://hexagram.foo/posts/inference-side-channel-attacks/</link>
+      <pubDate>Fri, 17 Sep 2021 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/inference-side-channel-attacks/</guid>
+      <description>&lt;h2 id=&#34;a-brief-history&#34;&gt;A Brief History&lt;/h2&gt;
+&lt;p&gt;Inference, that is, induction and deduction, are perhaps my personal favorite classes of problem-solving methods. Given very little initial information, depending on our model and situation, we can utilize just a few points to infer other information which was never directly presented to us. From Pythagoras, to Euclid, and Spinoza—to the use of modern inductive algorithms like those being developed at MIRI—inference is a powerful primitive, and somewhat of a universal open secret, playing a role almost everywhere we look—from philosophy, to economics, game theory, aerospace, medicine, computer science, and any scenario in which probability is of importance. In the spirit of Lewis Carrol:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Security (Theater) Questions</title>
+      <link>https://hexagram.foo/posts/security-theater-questions/</link>
+      <pubDate>Thu, 16 Sep 2021 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/security-theater-questions/</guid>
+      <description>&lt;p&gt;In the time before improved multi-factor authentication schemes like Authy and Yubikeys, there were security questions. And for some reason, they seem as though they&amp;rsquo;ll never give us up. Even today, some organizations still rely on them, asking users to set questions and answers as a way to validate users out-of-band, in the event of forgetting a password. You might recall services like AOL and AIM using these. But if anything, they&amp;rsquo;re more of a security vulnerability.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Small Bugs, Big Bugs</title>
+      <link>https://hexagram.foo/posts/small-bugs-big-bugs/</link>
+      <pubDate>Thu, 09 Sep 2021 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/small-bugs-big-bugs/</guid>
+      <description>&lt;h2 id=&#34;then&#34;&gt;Then&lt;/h2&gt;
+&lt;p&gt;In February 2020, I decided to check out web application security programs on HackerOne. I
+set my eyes on AT&amp;amp;T for the novel fact that, in the 1960s, they almost invented the
+internet,
+but their research was prematurely halted citing costs and technical hurdles. Nonetheless, AT&amp;amp;T&amp;rsquo;s Picturephone is a historical but often forgotten piece of history.&lt;/p&gt;
+&lt;p&gt;After burning nearly $500 million dollars on the effort, AT&amp;amp;T, then known as Bell Labs, scrapped the project entirely. And later, the Advanced Research Projects Agency and Department of Defense would lay claim to inventing the base technologies which would eventually grow to become the Internet.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>About</title>
+      <link>https://hexagram.foo/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/about/</guid>
+      <description>&lt;p&gt;Just another github blog. I&amp;rsquo;m interested in physics, math, engineering, brains, language, and economics.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;fog&#34; loading=&#34;lazy&#34; src=&#34;https://hexagram.foo/about/fog.jpeg&#34;&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

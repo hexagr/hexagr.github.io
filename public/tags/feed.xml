@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tags on Stephan Bridger</title>
+    <link>https://hexagram.foo/tags/</link>
+    <description>Recent content in Tags on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 11 May 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/tags/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Cpp</title>
+      <link>https://hexagram.foo/tags/cpp/</link>
+      <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/cpp/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Programming</title>
+      <link>https://hexagram.foo/tags/programming/</link>
+      <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/programming/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Windows</title>
+      <link>https://hexagram.foo/tags/windows/</link>
+      <pubDate>Sun, 11 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/windows/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>C</title>
+      <link>https://hexagram.foo/tags/c/</link>
+      <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/c/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Malware</title>
+      <link>https://hexagram.foo/tags/malware/</link>
+      <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/malware/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Red Team</title>
+      <link>https://hexagram.foo/tags/red-team/</link>
+      <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/red-team/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Networking</title>
+      <link>https://hexagram.foo/tags/networking/</link>
+      <pubDate>Wed, 19 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/networking/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Wifi</title>
+      <link>https://hexagram.foo/tags/wifi/</link>
+      <pubDate>Wed, 19 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/wifi/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Development</title>
+      <link>https://hexagram.foo/tags/development/</link>
+      <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/development/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>ELF</title>
+      <link>https://hexagram.foo/tags/elf/</link>
+      <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/elf/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux</title>
+      <link>https://hexagram.foo/tags/linux/</link>
+      <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/linux/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Research</title>
+      <link>https://hexagram.foo/tags/research/</link>
+      <pubDate>Sun, 23 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/research/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Note</title>
+      <link>https://hexagram.foo/tags/note/</link>
+      <pubDate>Mon, 04 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/note/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Sideblog</title>
+      <link>https://hexagram.foo/tags/sideblog/</link>
+      <pubDate>Mon, 04 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/sideblog/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Csharp</title>
+      <link>https://hexagram.foo/tags/csharp/</link>
+      <pubDate>Sun, 03 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/csharp/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Process Enumeration</title>
+      <link>https://hexagram.foo/tags/process-enumeration/</link>
+      <pubDate>Sun, 03 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/process-enumeration/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Windbg</title>
+      <link>https://hexagram.foo/tags/windbg/</link>
+      <pubDate>Sat, 02 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/windbg/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Appsec</title>
+      <link>https://hexagram.foo/tags/appsec/</link>
+      <pubDate>Fri, 17 Sep 2021 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/tags/appsec/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

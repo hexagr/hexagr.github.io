@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Appsec on Stephan Bridger</title>
+    <link>https://hexagram.foo/tags/appsec/</link>
+    <description>Recent content in Appsec on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 17 Sep 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/tags/appsec/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Inference: Side-Channel Attacks</title>
+      <link>https://hexagram.foo/posts/inference-side-channel-attacks/</link>
+      <pubDate>Fri, 17 Sep 2021 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/inference-side-channel-attacks/</guid>
+      <description>&lt;h2 id=&#34;a-brief-history&#34;&gt;A Brief History&lt;/h2&gt;
+&lt;p&gt;Inference, that is, induction and deduction, are perhaps my personal favorite classes of problem-solving methods. Given very little initial information, depending on our model and situation, we can utilize just a few points to infer other information which was never directly presented to us. From Pythagoras, to Euclid, and Spinoza—to the use of modern inductive algorithms like those being developed at MIRI—inference is a powerful primitive, and somewhat of a universal open secret, playing a role almost everywhere we look—from philosophy, to economics, game theory, aerospace, medicine, computer science, and any scenario in which probability is of importance. In the spirit of Lewis Carrol:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Security (Theater) Questions</title>
+      <link>https://hexagram.foo/posts/security-theater-questions/</link>
+      <pubDate>Thu, 16 Sep 2021 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/security-theater-questions/</guid>
+      <description>&lt;p&gt;In the time before improved multi-factor authentication schemes like Authy and Yubikeys, there were security questions. And for some reason, they seem as though they&amp;rsquo;ll never give us up. Even today, some organizations still rely on them, asking users to set questions and answers as a way to validate users out-of-band, in the event of forgetting a password. You might recall services like AOL and AIM using these. But if anything, they&amp;rsquo;re more of a security vulnerability.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Small Bugs, Big Bugs</title>
+      <link>https://hexagram.foo/posts/small-bugs-big-bugs/</link>
+      <pubDate>Thu, 09 Sep 2021 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/small-bugs-big-bugs/</guid>
+      <description>&lt;h2 id=&#34;then&#34;&gt;Then&lt;/h2&gt;
+&lt;p&gt;In February 2020, I decided to check out web application security programs on HackerOne. I
+set my eyes on AT&amp;amp;T for the novel fact that, in the 1960s, they almost invented the
+internet,
+but their research was prematurely halted citing costs and technical hurdles. Nonetheless, AT&amp;amp;T&amp;rsquo;s Picturephone is a historical but often forgotten piece of history.&lt;/p&gt;
+&lt;p&gt;After burning nearly $500 million dollars on the effort, AT&amp;amp;T, then known as Bell Labs, scrapped the project entirely. And later, the Advanced Research Projects Agency and Department of Defense would lay claim to inventing the base technologies which would eventually grow to become the Internet.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

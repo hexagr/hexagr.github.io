@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Csharp on Stephan Bridger</title>
+    <link>https://hexagram.foo/tags/csharp/</link>
+    <description>Recent content in Csharp on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 03 Sep 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/tags/csharp/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Using C Sharp to Enumerate Windows Processes</title>
+      <link>https://hexagram.foo/posts/using-c-sharp-to-enumerate-windows-processes/</link>
+      <pubDate>Sun, 03 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/using-c-sharp-to-enumerate-windows-processes/</guid>
+      <description>&lt;p&gt;In previous posts, I covered how to observe process information &lt;a href=&#34;https://hexagr.blogspot.com/2023/08/windows-process-initialization.html&#34;&gt;in Windbg by starting a debugging session and dumping the Process Environment Block&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;And how we can view the EPROCESS structure, including a doubly linked-list of &lt;a href=&#34;https://hexagram.foo/posts/finding-active-processes-with-windbg/&#34;&gt;active processes via ActiveProcessLinks&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;But in this post, we&amp;rsquo;ll discuss yet another way of gleaning information about processes in Windows, this time from another structure within the Windows ecosystem: the &lt;code&gt;SYSTEM_PROCESS_INFORMATION&lt;/code&gt; structure.&lt;/p&gt;
+&lt;h2 id=&#34;system_process_information-structure&#34;&gt;SYSTEM_PROCESS_INFORMATION Structure&lt;/h2&gt;
+&lt;p&gt;Microsoft tells us in their documentation that this structure holds various entries which hold system and process information.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

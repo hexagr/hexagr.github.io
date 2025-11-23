@@ -1,0 +1,135 @@
+title = "Stephan Bridger"
+baseURL = "https://hexagram.foo/"
+theme = "PaperMod"
+enableRobotsTXT = true
+enableEmoji = true
+
+
+[params]
+env = "production"
+description = "Stephan Bridger's github blog."
+author = "Stephan Bridger"
+favicon = "favicon.ico"
+DateFormat = ":date_long"
+timeZone = "America New York"
+useCustomAnalytics = false
+mainSections = ["posts"]
+showAllPostsArchive = true
+DisableLanguageSwitch = true
+defaultTheme = "auto"
+TocOpen = false
+TocSide = "right"
+EnableInstantClick = false
+EnableImageZoom = true
+ShowShareButtons = true
+ShareButtons = ["twitter", "linkedin", "reddit", "facebook", "whatsapp", "telegram", "ycombinator"]
+ShowReadingTime = true
+ShowWordCount = true
+ShowCodeCopyButtons = true
+ShowPostNavLinks = true
+Email = "hello@example.com"
+images = ["fog.jpeg"]
+
+[params.profileMode]
+enabled = true
+title = " "
+subtitle = "The Kraken sleepeth;"
+imageUrl = "/cardinal.jpg"
+imageTitle = "Cardinal"
+imageWidth = 120
+imageHeight = 120
+defaultTheme = "light"
+
+[[params.profileMode.buttons]]
+name = "Archive"
+url = "/archive"
+
+[[params.profileMode.buttons]]
+name = "Tags"
+url = "/tags"
+
+[[params.socialIcons]]
+name = "github"
+url = "https://github.com/hexagr"
+
+[[params.socialIcons]]
+name = "twitter"
+url = "https://x.com/hexagr"
+
+[[params.socialIcons]]
+name = "hackerone"
+url = "https://hackerone.com/hexagr"
+
+[[params.socialIcons]]
+name = "flickr"
+url = "https://flickr.com/photos/hexagr"
+
+[[params.socialIcons]]
+name = "mastodon"
+url = "https://mastodon.social/@hexagr"
+
+[[params.socialIcons]]
+name = "spotify"
+url = "https://open.spotify.com/user/9z8szmfko3ibkbzv062di4hna"
+
+[[params.socialIcons]]
+name = "gitlab"
+url = "https://gitlab.com/hexagr"
+
+[[params.socialIcons]]
+name = "rss"
+url = "feed.xml"
+
+[params.socialAccounts.twitter]
+username = "hexagr"
+
+[params.homeInfoParams]
+Title = "The Kraken sleepeth;"
+Content = ""
+
+[permalinks]
+notes = "/:section/:year/:month/:slugorcontentbasename/"
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
+
+[outputFormats.RSS]
+mediatype = "application/rss"
+baseName = "feed"
+
+[minify]
+disableXML = true
+minifyOutput = true
+
+[[menu.main]]
+name = "Posts"
+url = "/posts/"
+weight = 1
+
+[[menu.main]]
+name = "Search"
+url = "/search/"
+weight = 3
+
+[[menu.main]]
+name = "Tags"
+url = "/tags/"
+weight = 4
+
+[[menu.main]]
+name = "About"
+url = "/about/"
+weight = 5
+
+[languages.en]
+languageName = "English"
+
+[markup.goldmark.renderer]
+unsafe = false
+
+[markup.highlight]
+style = "tango"
+codeFences = true
+lineNos = false
+noClasses = false
+

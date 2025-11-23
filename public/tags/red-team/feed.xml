@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Red Team on Stephan Bridger</title>
+    <link>https://hexagram.foo/tags/red-team/</link>
+    <description>Recent content in Red Team on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 16 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/tags/red-team/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bypassing Windows Defender</title>
+      <link>https://hexagram.foo/posts/bypassing-windows-defender/</link>
+      <pubDate>Wed, 16 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/bypassing-windows-defender/</guid>
+      <description>&lt;p&gt;Lately I&amp;rsquo;ve been poking around at Windows internals and writing low level code. This morning I thought I&amp;rsquo;d try to bypass Windows Defender &lt;em&gt;and&lt;/em&gt; get a low score on Virus Total.&lt;/p&gt;
+&lt;p&gt;One trick I’ve been playing with is writing shellcode to the Windows registry to keep things “fileless.” It’s not super fancy, but it’s kind of neat. I combined that with indirect syscalls and some cryptographic routines to get Windows Defender to chill out.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

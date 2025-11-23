@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Windbg on Stephan Bridger</title>
+    <link>https://hexagram.foo/categories/windbg/</link>
+    <description>Recent content in Windbg on Stephan Bridger</description>
+    <image>
+      <title>Stephan Bridger</title>
+      <url>https://hexagram.foo/fog.jpeg</url>
+      <link>https://hexagram.foo/fog.jpeg</link>
+    </image>
+    <generator>Hugo -- 0.150.1</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 02 Sep 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hexagram.foo/categories/windbg/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Finding Active Processes with Windbg</title>
+      <link>https://hexagram.foo/posts/finding-active-processes-with-windbg/</link>
+      <pubDate>Sat, 02 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://hexagram.foo/posts/finding-active-processes-with-windbg/</guid>
+      <description>&lt;p&gt;In the Windows kernel, each process is assigned an EPROCESS structure, which is a kernel object that represents a program or process. And a Process Environment Block (PEB) is just one of many structures pointed to by the EPROCESS structure.  A snippet from &lt;code&gt;_EPROCESS&lt;/code&gt; as documented on Vergilius Project:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-C&#34; data-lang=&#34;C&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;volatile&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ULONGLONG&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;OwnerProcessId&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PEB&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Peb&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_MM_SESSION_SPACE&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Session&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;VOID&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Sparel&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In user space however, we cannot directly reference all of the EPROCESS structures and their data. At most, we can do something like &lt;code&gt;dt nt!_EPROCESS&lt;/code&gt; in windbg and get a peek at the layout. We&amp;rsquo;ll have to enable kernel debugging to more closely examine things. But here&amp;rsquo;s what we can see in user mode. The EPROCESS structure is large. The entire output from windbg is as follows:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
